@@ -3,7 +3,7 @@
 //
 
 #include "bunka.h"
-
+#include <stdlib.h>
 #ifndef POS_SEM_MAPA_H
 #define POS_SEM_MAPA_H
 

@@ -10,6 +10,7 @@ add_executable(POS_SEM main.c
         server.c
         server.h
         mapa.c
-        mapa.h)
+        mapa.h
+        bunka.c)
 
 target_link_libraries(POS_SEM pthread)
