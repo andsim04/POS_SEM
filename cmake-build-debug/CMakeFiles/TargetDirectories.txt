@@ -1,3 +1,0 @@
-/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/CMakeFiles/POS_SEM.dir
-/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/CMakeFiles/edit_cache.dir
-/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/CMakeFiles/rebuild_cache.dir
