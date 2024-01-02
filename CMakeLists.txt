@@ -3,4 +3,13 @@ project(POS_SEM C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(POS_SEM main.c)
+add_executable(POS_SEM main.c
+        bunka.h
+        klient.c
+        klient.h
+        server.c
+        server.h
+        mapa.c
+        mapa.h)
+
+target_link_libraries(POS_SEM pthread)
