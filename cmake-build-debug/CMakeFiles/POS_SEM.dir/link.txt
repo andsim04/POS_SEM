@@ -1,0 +1,1 @@
+/usr/bin/cc -g CMakeFiles/POS_SEM.dir/main.c.o -o POS_SEM 
