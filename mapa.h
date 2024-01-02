@@ -8,8 +8,13 @@
 #define POS_SEM_MAPA_H
 
 typedef struct mapa {
+    int sirka;
+    int vyska;
     BUNKA** mapa;
 
 } MAPA;
+
+void mapa_init(MAPA* mapa, int sirka, int vyska);
+void mapa_vykresli(MAPA mapa);
 
 #endif //POS_SEM_MAPA_H
