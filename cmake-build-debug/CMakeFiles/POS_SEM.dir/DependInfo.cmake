@@ -1,15 +1,18 @@
+
+# Consider dependencies only in project.
+set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
+
 # The set of languages for which implicit dependencies are needed:
 set(CMAKE_DEPENDS_LANGUAGES
-  "C"
   )
-# The set of files for implicit dependencies of each language:
-set(CMAKE_DEPENDS_CHECK_C
-  "/tmp/tmp.HiB0icRJpC/main.c" "/tmp/tmp.HiB0icRJpC/cmake-build-debug/CMakeFiles/POS_SEM.dir/main.c.o"
-  )
-set(CMAKE_C_COMPILER_ID "GNU")
 
-# The include file search paths:
-set(CMAKE_C_TARGET_INCLUDE_PATH
+# The set of dependency files which are needed:
+set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/mnt/c/Users/andre/CLionProjects/POS_SEM/bunka.c" "CMakeFiles/POS_SEM.dir/bunka.c.o" "gcc" "CMakeFiles/POS_SEM.dir/bunka.c.o.d"
+  "/mnt/c/Users/andre/CLionProjects/POS_SEM/klient.c" "CMakeFiles/POS_SEM.dir/klient.c.o" "gcc" "CMakeFiles/POS_SEM.dir/klient.c.o.d"
+  "/mnt/c/Users/andre/CLionProjects/POS_SEM/main.c" "CMakeFiles/POS_SEM.dir/main.c.o" "gcc" "CMakeFiles/POS_SEM.dir/main.c.o.d"
+  "/mnt/c/Users/andre/CLionProjects/POS_SEM/mapa.c" "CMakeFiles/POS_SEM.dir/mapa.c.o" "gcc" "CMakeFiles/POS_SEM.dir/mapa.c.o.d"
+  "/mnt/c/Users/andre/CLionProjects/POS_SEM/server.c" "CMakeFiles/POS_SEM.dir/server.c.o" "gcc" "CMakeFiles/POS_SEM.dir/server.c.o.d"
   )
 
 # Targets to which this target links.

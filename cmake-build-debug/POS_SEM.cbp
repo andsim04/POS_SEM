@@ -8,78 +8,102 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/tmp/tmp.HiB0icRJpC/cmake-build-debug"/>
+				<Option working_dir="/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="rebuild_cache">
-				<Option working_dir="/tmp/tmp.HiB0icRJpC/cmake-build-debug"/>
-				<Option type="4"/>
-				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-				</MakeCommands>
-			</Target>
-			<Target title="edit_cache">
-				<Option working_dir="/tmp/tmp.HiB0icRJpC/cmake-build-debug"/>
-				<Option type="4"/>
-				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="POS_SEM">
-				<Option output="/tmp/tmp.HiB0icRJpC/cmake-build-debug/POS_SEM" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/tmp/tmp.HiB0icRJpC/cmake-build-debug"/>
+				<Option output="/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/POS_SEM" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/10/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/12/include"/>
 					<Add directory="/usr/local/include"/>
 					<Add directory="/usr/include/x86_64-linux-gnu"/>
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 POS_SEM"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 POS_SEM"/>
+					<CompileFile command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="POS_SEM/fast">
-				<Option output="/tmp/tmp.HiB0icRJpC/cmake-build-debug/POS_SEM" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/tmp/tmp.HiB0icRJpC/cmake-build-debug"/>
+				<Option output="/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/POS_SEM" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/10/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/12/include"/>
 					<Add directory="/usr/local/include"/>
 					<Add directory="/usr/include/x86_64-linux-gnu"/>
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 POS_SEM/fast"/>
-					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/gmake -j4 -f &quot;/tmp/tmp.HiB0icRJpC/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 POS_SEM/fast"/>
+					<CompileFile command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j16 -f &quot;/mnt/c/Users/andre/CLionProjects/POS_SEM/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/tmp/tmp.HiB0icRJpC/main.c">
+		<Unit filename="/mnt/c/Users/andre/CLionProjects/POS_SEM/bunka.c">
 			<Option target="POS_SEM"/>
 		</Unit>
-		<Unit filename="/tmp/tmp.HiB0icRJpC/CMakeLists.txt">
+		<Unit filename="/mnt/c/Users/andre/CLionProjects/POS_SEM/bunka.h">
+			<Option target="POS_SEM"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/andre/CLionProjects/POS_SEM/klient.c">
+			<Option target="POS_SEM"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/andre/CLionProjects/POS_SEM/klient.h">
+			<Option target="POS_SEM"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/andre/CLionProjects/POS_SEM/main.c">
+			<Option target="POS_SEM"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/andre/CLionProjects/POS_SEM/mapa.c">
+			<Option target="POS_SEM"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/andre/CLionProjects/POS_SEM/mapa.h">
+			<Option target="POS_SEM"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/andre/CLionProjects/POS_SEM/server.c">
+			<Option target="POS_SEM"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/andre/CLionProjects/POS_SEM/server.h">
+			<Option target="POS_SEM"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/andre/CLionProjects/POS_SEM/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>

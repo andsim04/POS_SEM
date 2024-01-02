@@ -29,3 +29,5 @@ void bunka_zhor(BUNKA* bunka) {
     bunka->zhorena = true;
 }
 
+
+

@@ -16,5 +16,6 @@ typedef struct mapa {
 
 void mapa_init(MAPA* mapa, int sirka, int vyska);
 void mapa_vykresli(MAPA mapa);
+void mapa_destroy(MAPA* mapa);
 
 #endif //POS_SEM_MAPA_H

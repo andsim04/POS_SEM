@@ -19,4 +19,5 @@ void bunka_podpal(BUNKA* bunka);
 void bunka_zmen(BUNKA* bunka, char biotop);
 void bunka_zhor(BUNKA* bunka);
 
+
 #endif //POS_SEM_BUNKA_H
