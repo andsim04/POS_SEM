@@ -11,6 +11,7 @@ typedef struct mapa {
     int sirka;
     int vyska;
     BUNKA** mapa;
+    int vietor;
 
 } MAPA;
 
