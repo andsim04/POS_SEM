@@ -3,7 +3,7 @@
 //
 #include "bunka.h"
 
-void bunka_init(BUNKA* bunka, char biotop, _Bool horlavy, _Bool ohen, bool zhorena) {
+void bunka_init(BUNKA* bunka, char biotop, _Bool horlavy, _Bool ohen, bool zhorena, int x, int y) {
     bunka->biotop = biotop;
     bunka->horlavy = horlavy;
     bunka->ohen = ohen;

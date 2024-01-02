@@ -7,13 +7,15 @@
 #define POS_SEM_BUNKA_H
 
 typedef struct bunka {
+    int x;
+    int y;
     char biotop;
     bool horlavy;
     bool ohen;
     bool zhorena;
 } BUNKA;
 
-void bunka_init(BUNKA* bunka, char biotop, _Bool horlavy, _Bool ohen, _Bool zhorena);
+void bunka_init(BUNKA* bunka, char biotop, _Bool horlavy, _Bool ohen, _Bool zhorena, int x, int y);
 void bunka_vykresli(BUNKA bunka);
 void bunka_podpal(BUNKA* bunka);
 void bunka_zmen(BUNKA* bunka, char biotop);
