@@ -12,9 +12,11 @@ void* simulacia(void* thr_data) {
     BUNKA zhorene_bunky[data->mapa->sirka*data->mapa->vyska];
     BUNKA luky_bunky[data->mapa->sirka * data->mapa->vyska];
     vietor.trvanie = 0;
+    vietor.smer =0;
     int kolocount = 0;
     while(true) {
         kolocount++;
+
         printf("================KOLO %d================\n", kolocount);
         int rngVietor = (rand()%101)+1;
         if (vietor.trvanie == 0 && (rngVietor <= 10)) {
@@ -61,7 +63,7 @@ void* simulacia(void* thr_data) {
         int horiace_bunky_velkost = 0;
         for (int i = 0; i < data->mapa->vyska; i++) {
             for (int j = 0; j < data->mapa->sirka; j++) {
-                if (data->mapa->mapa[i][j].ohen) {
+                if (data->mapa->mapa[i][j].biotop == 'O') {
                     horiace_bunky[horiace_bunky_velkost] = data->mapa->mapa[i][j];
                     horiace_bunky_velkost++;
                 }
@@ -116,8 +118,9 @@ int main() {
         }
     }
 
-    simulacia(&thread_data);
+    //mapa_vykresli(mapa);
 
+    simulacia(&thread_data);
 
     mapa_vykresli(mapa);
 

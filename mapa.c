@@ -24,15 +24,15 @@ void mapa_init(MAPA* mapa, int sirka, int vyska) {
                     break;
                 case 1:
                     //biotop luka
-                    bunka_init(&mapa->mapa[i][j], 'P', true, false, false, j, i);
+                    bunka_init(&mapa->mapa[i][j], 'P', true, false, false, i, j);
                     break;
                 case 2:
                     //biotop hory
-                    bunka_init(&mapa->mapa[i][j], 'M', false, false, false, j, i);
+                    bunka_init(&mapa->mapa[i][j], 'M', false, false, false, i, j);
                     break;
                 case 3:
                     //biotop voda
-                    bunka_init(&mapa->mapa[i][j], 'W', false, false, false, j, i);
+                    bunka_init(&mapa->mapa[i][j], 'W', false, false, false, i, j);
                     break;
             }
         }
@@ -40,9 +40,15 @@ void mapa_init(MAPA* mapa, int sirka, int vyska) {
 }
 
 void mapa_vykresli(MAPA mapa) {
+    printf("\n   ");
+
+    for (int i = 0; i < mapa.sirka; ++i) {
+        printf("%d-", i);
+    }
     printf("\n");
+
     for (int i = 0; i < mapa.vyska; i++) {
-        printf("|");
+        printf("%d |",i);
         for (int j = 0; j < mapa.sirka; j++) {
             if ((j + 1) == mapa.sirka) {
                 bunka_vykresli(mapa.mapa[i][j]);
@@ -94,6 +100,7 @@ void mapa_zmen_luka(MAPA* mapa, int x, int y) {
         mapa->mapa[x][y].biotop = 'P';
         mapa->mapa[x][y].horlavy = true;
         mapa->mapa[x][y].zhorena = false;
+        printf("Zmena lúku: [%d, %d]\n", x,y);
     }
 }
 
@@ -115,15 +122,17 @@ void mapa_zmen_les(MAPA* mapa, int x, int y) {
         if (mapa->mapa[x][y + 1].biotop == 'F' && rng <= 2)
             count++;
 
-    if (count > 0) mapa->mapa[x][y].biotop = 'F';
+    if (count > 0) {
+        mapa->mapa[x][y].biotop = 'F';
+        printf("Zmena les: [%d, %d]\n", x,y);
+    }
 }
 
 void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra) {
     mapa->mapa[x][y].ohen = false;
-    if (mapa->mapa[x][y].horlavy) {
-        mapa->mapa[x][y].zhorena = true;
-        mapa->mapa[x][y].biotop = 'X';
-    }
+    mapa->mapa[x][y].zhorena = true;
+    mapa->mapa[x][y].biotop = 'X';
+    printf("Zhorene policko: [%d, %d]\n", x,y);
 
     if (x != 0) {
         if (mapa->mapa[x - 1][y].horlavy) {

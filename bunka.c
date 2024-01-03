@@ -8,7 +8,7 @@ void bunka_init(BUNKA* bunka, char biotop, _Bool horlavy, _Bool ohen, bool zhore
     bunka->horlavy = horlavy;
     bunka->ohen = ohen;
     bunka->zhorena = zhorena;
-    bunka->x = x;  // rotato
+    bunka->x = x;
     bunka->y = y;
 }
 
