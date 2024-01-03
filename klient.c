@@ -29,7 +29,13 @@ void* simulacia(void* thr_data) {
         for (int i = 0; i < data->mapa->vyska; i++) {
             for (int j = 0; j < data->mapa->sirka; j++) {
                 if (data->mapa->mapa[i][j].biotop == 'P') {
-                    luky_bunky[luky_bunky_velkost] = data->mapa->mapa[i][j];
+                    luky_bunky[luky_bunky_velkost].y = data->mapa->mapa[i][j].y;
+                    luky_bunky[luky_bunky_velkost].x = data->mapa->mapa[i][j].x;
+                    luky_bunky[luky_bunky_velkost].biotop = data->mapa->mapa[i][j].biotop;
+                    luky_bunky[luky_bunky_velkost].horlavy = data->mapa->mapa[i][j].horlavy;
+                    luky_bunky[luky_bunky_velkost].zhorena = data->mapa->mapa[i][j].zhorena;
+                    luky_bunky[luky_bunky_velkost].ohen = data->mapa->mapa[i][j].ohen;
+
                     luky_bunky_velkost++;
                 }
             }
@@ -65,8 +71,8 @@ void* simulacia(void* thr_data) {
             mapa_rozsir_ohen(data->mapa, horiace_bunky[i].x, horiace_bunky[i].y, vietor.smer);
         }
 
-        //koniec krit sekcie
 
+        //koniec krit sekcie
 
 
         if (vietor.trvanie > 0) vietor.trvanie--;
@@ -97,15 +103,16 @@ int main() {
     int zapal1 = rand()%6;
     int zapal2 = rand()%10;
     mapa_rozsir_ohen(&mapa, zapal1, zapal2, 0);
-    printf("Zapalene policko: [%d, %d]\n", zapal1, zapal2);
+
      */
     int zapal1 = 0;
     int zapal2 = 0;
     for (int i = 0; i < 5; ++i) {
-        zapal1 = rand()%6;
         zapal2 = rand()%10;
+        zapal1 = rand()%6;
         if (mapa.mapa[zapal1][zapal2].horlavy) {
             mapa_rozsir_ohen(&mapa, zapal1, zapal2, 0);
+            printf("Zapalene policko: [%d, %d]\n", zapal1, zapal2);
         }
     }
 

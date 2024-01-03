@@ -78,7 +78,7 @@ void mapa_zmen_luka(MAPA* mapa, int x, int y) {
         if (mapa->mapa[x - 1][y].biotop == 'W' && rng <= 10)
             count++;
 
-    if (x != mapa->vyska)
+    if (x != mapa->vyska - 1)
         if (mapa->mapa[x + 1][y].biotop == 'W' && rng <= 10)
             count++;
 
@@ -86,7 +86,7 @@ void mapa_zmen_luka(MAPA* mapa, int x, int y) {
         if (mapa->mapa[x][y - 1].biotop == 'W' && rng <= 10)
             count++;
 
-    if (y != mapa->sirka)
+    if (y != mapa->sirka - 1)
         if (mapa->mapa[x][y + 1].biotop == 'W' && rng <= 10)
             count++;
 
@@ -104,14 +104,14 @@ void mapa_zmen_les(MAPA* mapa, int x, int y) {
         if (mapa->mapa[x - 1][y].biotop == 'F' && rng <= 2)
             count++;
 
-    if (x != mapa->vyska)
+    if (x != mapa->vyska - 1)
         if (mapa->mapa[x + 1][y].biotop == 'F' && rng <= 2)
             count++;
     if (y != 0)
         if (mapa->mapa[x][y - 1].biotop == 'F' && rng <= 2)
             count++;
 
-    if (y != mapa->sirka)
+    if (y != mapa->sirka - 1)
         if (mapa->mapa[x][y + 1].biotop == 'F' && rng <= 2)
             count++;
 
@@ -145,7 +145,7 @@ void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra) {
             }
         }
     }
-    if (x != mapa->vyska) {
+    if (x != (mapa->vyska - 1)) {
         if (mapa->mapa[x + 1][y].horlavy) {
             if (smerVetra == 3 && (rand()%101+1 < 90)) {
                 mapa->mapa[x + 1][y].ohen = true;
@@ -185,7 +185,7 @@ void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra) {
             }
         }
     }
-    if (y != mapa->sirka) {
+    if (y != (mapa->sirka - 1)) {
         if (mapa->mapa[x][y + 1].horlavy) {
             if (smerVetra == 2 && (rand()%101+1 < 90)) {
                 mapa->mapa[x][y + 1].ohen = true;
