@@ -10,7 +10,7 @@ int main() {
     mapa_init(&mapa, 6, 8);
     mapa_vykresli(mapa);
 
-    mapa_rozsir_ohen(&mapa, 1, 1, 2);
+    mapa_rozsir_ohen(&mapa, 1, 1, 0);
 
     mapa_vykresli(mapa);
 

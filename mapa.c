@@ -62,22 +62,94 @@ void mapa_destroy(MAPA* mapa) {
 
 }
 
+void mapa_zmen_luka(MAPA* mapa, int x, int y) {
+    int count = 0;
+    int rng = (rand() % 101) + 1;
+    if (x != 0)
+        if (mapa->mapa[x - 1][y].biotop == 'W' && rng <= 10)
+            count++;
+
+    if (x != mapa->vyska)
+        if (mapa->mapa[x + 1][y].biotop == 'W' && rng <= 10)
+            count++;
+
+    if (y != 0)
+        if (mapa->mapa[x][y - 1].biotop == 'W' && rng <= 10)
+            count++;
+
+    if (y != mapa->sirka)
+        if (mapa->mapa[x][y + 1].biotop == 'W' && rng <= 10)
+            count++;
+
+    if (count > 0) {
+        mapa->mapa[x][y].biotop = 'P';
+        mapa->mapa[x][y].horlavy = true;
+        mapa->mapa[x][y].zhorena = false;
+    }
+}
+
+void mapa_zmen_les(MAPA* mapa, int x, int y) {
+    int count = 0;
+    int rng = (rand() % 101) + 1;
+    if (x != 0)
+        if (mapa->mapa[x - 1][y].biotop == 'F' && rng <= 2)
+            count++;
+
+    if (x != mapa->vyska)
+        if (mapa->mapa[x + 1][y].biotop == 'F' && rng <= 2)
+            count++;
+    if (y != 0)
+        if (mapa->mapa[x][y - 1].biotop == 'F' && rng <= 2)
+            count++;
+
+    if (y != mapa->sirka)
+        if (mapa->mapa[x][y + 1].biotop == 'F' && rng <= 2)
+            count++;
+
+    if (count > 0) mapa->mapa[x][y].biotop = 'F';
+}
+
 void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra) {
     mapa->mapa[x][y].ohen = false;
     if (mapa->mapa[x][y].horlavy) {
         mapa->mapa[x][y].zhorena = true;
+        mapa->mapa[x][y].biotop = 'X';
+    }
+
+    switch (smerVetra) {
+        case 0:
+            printf("Je bezvetrie\n");
+            break;
+        case 1:
+            printf("Vietor duje na sever\n");
+            break;
+        case 2:
+            printf("Vietor duje na východ\n");
+            break;
+        case 3:
+            printf("Vietor duje na juh\n");
+            break;
+        case 4:
+            printf("Vietor duje na západ\n");
+            break;
     }
 
     if (x != 0) {
         if (mapa->mapa[x - 1][y].horlavy) {
             if (smerVetra == 1 && (rand()%101+1 < 90)) {
                 mapa->mapa[x - 1][y].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x-1, y);
             } else if ((smerVetra == 0 || smerVetra == 2 || smerVetra == 4) && (rand()%101+1 < 20)) {
                 mapa->mapa[x - 1][y].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x-1, y);
             } else if (smerVetra == 3 && rand()%101+1 < 2) {
                 mapa->mapa[x - 1][y].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x-1, y);
             }
         }
@@ -86,12 +158,18 @@ void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra) {
         if (mapa->mapa[x + 1][y].horlavy) {
             if (smerVetra == 3 && (rand()%101+1 < 90)) {
                 mapa->mapa[x + 1][y].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x+1, y);
             } else if ((smerVetra == 0 || smerVetra == 2 || smerVetra == 4) && (rand()%101+1 < 20)) {
                 mapa->mapa[x + 1][y].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x+1, y);
             } else if (smerVetra == 1 && rand()%101+1 < 2) {
                 mapa->mapa[x + 1][y].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x+1, y);
             }
         }
@@ -100,12 +178,18 @@ void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra) {
         if (mapa->mapa[x][y - 1].horlavy) {
             if (smerVetra == 4 && (rand()%101+1 < 90)) {
                 mapa->mapa[x][y - 1].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x, y-1);
             } else if ((smerVetra == 0 || smerVetra == 3 || smerVetra == 1) && (rand()%101+1 < 20)) {
                 mapa->mapa[x][y - 1].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x, y-1);
             } else if (smerVetra == 2 && rand()%101+1 < 2) {
                 mapa->mapa[x][y - 1].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x, y-1);
             }
         }
@@ -114,15 +198,20 @@ void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra) {
         if (mapa->mapa[x][y + 1].horlavy) {
             if (smerVetra == 2 && (rand()%101+1 < 90)) {
                 mapa->mapa[x][y + 1].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x, y+1);
             } else if ((smerVetra == 0 || smerVetra == 3 || smerVetra == 1) && (rand()%101+1 < 20)) {
                 mapa->mapa[x][y + 1].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x, y+1);
             } else if (smerVetra == 4 && rand()%101+1 < 2) {
                 mapa->mapa[x][y + 1].ohen = true;
+                mapa->mapa[x][y].horlavy = false;
+                mapa->mapa[x][y].biotop = 'O';
                 printf("Zacalo horiet policko [%d, %d]\n", x, y+1);
             }
         }
     }
-
 }

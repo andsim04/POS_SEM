@@ -19,5 +19,7 @@ void mapa_init(MAPA* mapa, int sirka, int vyska);
 void mapa_vykresli(MAPA mapa);
 void mapa_destroy(MAPA* mapa);
 void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra);
+void mapa_zmen_luka(MAPA* mapa, int x, int y);
+void mapa_zmen_les(MAPA* mapa, int x, int y);
 
 #endif //POS_SEM_MAPA_H
