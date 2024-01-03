@@ -42,11 +42,20 @@ void mapa_init(MAPA* mapa, int sirka, int vyska) {
 void mapa_vykresli(MAPA mapa) {
     printf("\n");
     for (int i = 0; i < mapa.vyska; i++) {
+        printf("|");
         for (int j = 0; j < mapa.sirka; j++) {
-            bunka_vykresli(mapa.mapa[i][j]);
+            if ((j + 1) == mapa.sirka) {
+                bunka_vykresli(mapa.mapa[i][j]);
+                printf("|");
+            } else {
+                bunka_vykresli(mapa.mapa[i][j]);
+                printf("-");
+            }
+
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 void mapa_destroy(MAPA* mapa) {
@@ -114,24 +123,6 @@ void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra) {
     if (mapa->mapa[x][y].horlavy) {
         mapa->mapa[x][y].zhorena = true;
         mapa->mapa[x][y].biotop = 'X';
-    }
-
-    switch (smerVetra) {
-        case 0:
-            printf("Je bezvetrie\n");
-            break;
-        case 1:
-            printf("Vietor duje na sever\n");
-            break;
-        case 2:
-            printf("Vietor duje na východ\n");
-            break;
-        case 3:
-            printf("Vietor duje na juh\n");
-            break;
-        case 4:
-            printf("Vietor duje na západ\n");
-            break;
     }
 
     if (x != 0) {
@@ -214,4 +205,86 @@ void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra) {
             }
         }
     }
+}
+
+void vypis_vietor(int smerVetra) {
+    switch (smerVetra) {
+        case 0:
+            printf("Je bezvetrie\n");
+            break;
+        case 1:
+            printf("Vietor duje na sever\n");
+            break;
+        case 2:
+            printf("Vietor duje na východ\n");
+            break;
+        case 3:
+            printf("Vietor duje na juh\n");
+            break;
+        case 4:
+            printf("Vietor duje na západ\n");
+            break;
+    }
+}
+
+void vytvorenie_mapy_rucne(int x, int y) {
+    //mozno aby vracalo nieco ine ako void mozno Mapa*
+    char biotop = ' ';
+    for (int i = 0; i < x; ++i) {
+
+        for (int j = 0; j < y; ++j) {
+            while (true) {
+                printf("Riadok %d\n", i);
+                printf("Stlpec %d\n", j);
+                printf("Zadajte biotop :");
+                scanf("%c", &biotop);
+                printf("\n");
+                if (biotop == 'F' || biotop == 'P' || biotop == 'W' || biotop == 'M') {
+                    // ulozenie do mapy
+                    break;
+                } else {
+                    printf("Zadaný biotop bol nespravny!\n");
+                    printf("Riadok %d\n", i);
+                    printf("Stlpec %d\n", j);
+                    printf("Zadajte biotop :");
+                    scanf("%c", &biotop);
+                    printf("\n");
+                }
+            }
+        }
+
+
+    }
+
+}
+
+void ulozenie_mapy(MAPA mapa, char* nazovSuboru) {
+    FILE *f = fopen(nazovSuboru, "w");
+    if (f == NULL) {
+        perror("Problém s otvorením súboru\n");
+        return;
+    }
+    // este nejako aby vypisalo konkretnu mapu, dat tam asi cislo  a podla nej ?
+    fprintf(f,"|");
+    for (int i = 0; i < mapa.vyska; ++i) {
+        for (int j = 0; j < mapa.sirka; ++j) {
+            if ((j + 1) == mapa.sirka) {
+                fprintf(f, "%c", mapa.mapa[i][j].biotop);
+                fprintf(f,"|");
+            } else {
+                fprintf(f, "%c", mapa.mapa[i][j].biotop);
+                fprintf(f, "-");
+            }
+
+        }
+        //fprintf(f, "\n");
+    }
+    printf("Mapa bola ulozena!\n");
+    fclose(f);
+}
+
+
+
+void nacitanie_mapy(MAPA* mapa, char* nazovSuboru) {
+
 }

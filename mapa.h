@@ -16,10 +16,14 @@ typedef struct mapa {
 } MAPA;
 
 void mapa_init(MAPA* mapa, int sirka, int vyska);
+void vytvorenie_mapy_rucne(int x, int y);
+void ulozenie_mapy(MAPA mapa, char* nazovSuboru);
+void nacitanie_mapy(MAPA* mapa, char* nazovSuboru);
 void mapa_vykresli(MAPA mapa);
 void mapa_destroy(MAPA* mapa);
 void mapa_rozsir_ohen(MAPA* mapa, int x, int y, int smerVetra);
 void mapa_zmen_luka(MAPA* mapa, int x, int y);
 void mapa_zmen_les(MAPA* mapa, int x, int y);
+void vypis_vietor(int smerVetra);
 
 #endif //POS_SEM_MAPA_H

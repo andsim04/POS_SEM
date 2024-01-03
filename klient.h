@@ -3,6 +3,7 @@
 //
 #include "mapa.h"
 #include <time.h>
+#include <unistd.h>
 
 #ifndef POS_SEM_KLIENT_H
 #define POS_SEM_KLIENT_H

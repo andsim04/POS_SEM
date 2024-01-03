@@ -2,7 +2,7 @@
 // Created by andre on 2. 1. 2024.
 //
 
-#include <unistd.h>
+
 #include "klient.h"
 
 void* simulacia(void* thr_data) {
@@ -23,7 +23,7 @@ void* simulacia(void* thr_data) {
         } else if (vietor.trvanie == 0 && (rngVietor > 10)){
             vietor.smer = 0;
         }
-
+        vypis_vietor(vietor.smer);
         // krit sekcia
         int luky_bunky_velkost = 0;
         for (int i = 0; i < data->mapa->vyska; i++) {
@@ -75,6 +75,14 @@ void* simulacia(void* thr_data) {
     }
 }
 
+void je_horlavy(MAPA mapa, int x, int y) {
+    if (mapa.mapa[x][y].horlavy) {
+        //vlozit do zasobnika a vybrat na zaciatku kola
+    } else {
+        printf("Bunka na suradniciah %d %d nezacala horiet pretoze je to biotop %c \n", x, y, mapa.mapa[x][y].biotop);
+    }
+}
+
 int main() {
 
     srand(time(NULL));
@@ -85,10 +93,22 @@ int main() {
     SIMULACIA_THREAD_DATA thread_data;
 
     thread_data.mapa = &mapa;
+    /*
     int zapal1 = rand()%6;
     int zapal2 = rand()%10;
     mapa_rozsir_ohen(&mapa, zapal1, zapal2, 0);
     printf("Zapalene policko: [%d, %d]\n", zapal1, zapal2);
+     */
+    int zapal1 = 0;
+    int zapal2 = 0;
+    for (int i = 0; i < 5; ++i) {
+        zapal1 = rand()%6;
+        zapal2 = rand()%10;
+        if (mapa.mapa[zapal1][zapal2].horlavy) {
+            mapa_rozsir_ohen(&mapa, zapal1, zapal2, 0);
+        }
+    }
+
     simulacia(&thread_data);
 
 
