@@ -3,7 +3,7 @@ project(POS_SEM C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(POS_SEM main.c
+add_executable(POS_SEM
         bunka.h
         klient.c
         klient.h

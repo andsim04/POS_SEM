@@ -11,9 +11,7 @@ void bunka_init(BUNKA* bunka, char biotop, _Bool horlavy, _Bool ohen, bool zhore
 }
 
 void bunka_vykresli(BUNKA bunka) {
-    if (bunka.ohen) printf("%c", 'O');
-    else if (bunka.zhorena) printf("%c", 'X');
-    else printf("%c", bunka.biotop);
+    printf("%c", bunka.biotop);
 }
 
 void bunka_podpal(BUNKA* bunka) {

@@ -2,26 +2,20 @@
 // Created by andre on 2. 1. 2024.
 //
 
+#include <unistd.h>
 #include "klient.h"
-#include "mapa.h"
-
-typedef struct vietor {
-    int trvanie;
-    int smer;
-} VIETOR;
-
-typedef struct horenie_thread_data {
-    MAPA* mapa;
-} HORENIE_THREAD_DATA;
 
 void* simulacia(void* thr_data) {
-    HORENIE_THREAD_DATA* data = (HORENIE_THREAD_DATA*) thr_data;
+    SIMULACIA_THREAD_DATA* data = (SIMULACIA_THREAD_DATA*) thr_data;
     VIETOR vietor;
     BUNKA horiace_bunky[data->mapa->sirka*data->mapa->vyska];
     BUNKA zhorene_bunky[data->mapa->sirka*data->mapa->vyska];
     BUNKA luky_bunky[data->mapa->sirka * data->mapa->vyska];
     vietor.trvanie = 0;
+    int kolocount = 0;
     while(true) {
+        kolocount++;
+        printf("================KOLO %d================\n", kolocount);
         int rngVietor = (rand()%101)+1;
         if (vietor.trvanie == 0 && (rngVietor <= 10)) {
             vietor.smer = (rand() % 4) + 1;
@@ -76,5 +70,31 @@ void* simulacia(void* thr_data) {
 
 
         if (vietor.trvanie > 0) vietor.trvanie--;
+        mapa_vykresli(*data->mapa);
+        sleep(5);
     }
+}
+
+int main() {
+
+    srand(time(NULL));
+    MAPA mapa;
+    mapa_init(&mapa, 10, 6);
+    mapa_vykresli(mapa);
+
+    SIMULACIA_THREAD_DATA thread_data;
+
+    thread_data.mapa = &mapa;
+    int zapal1 = rand()%6;
+    int zapal2 = rand()%10;
+    mapa_rozsir_ohen(&mapa, zapal1, zapal2, 0);
+    printf("Zapalene policko: [%d, %d]\n", zapal1, zapal2);
+    simulacia(&thread_data);
+
+
+    mapa_vykresli(mapa);
+
+    mapa_destroy(&mapa);
+    return 0;
+
 }
