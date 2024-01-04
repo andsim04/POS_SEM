@@ -13,6 +13,7 @@ typedef struct simulacia_thread_data {
     MAPA* mapa;
     VIETOR * vietor;
     bool * je_pozastavena;
+    bool * ukonci;
     pthread_mutex_t* mapa_mutex;
     pthread_cond_t * pozastavena;
     pthread_cond_t * bezi;
@@ -23,6 +24,7 @@ typedef struct menu_thread_data {
     VIETOR * vietor;
     bool * je_pozastavena;
     bool * zaciatok;
+    bool * ukonci;
     pthread_mutex_t* mapa_mutex;
     pthread_cond_t * pozastavena;
     pthread_cond_t * bezi;

@@ -243,20 +243,22 @@ void vypis_vietor(int smerVetra) {
 }
 
 void mapa_rucne(MAPA * mapa) {
-    int vyska, sirka;
+    int vyska = 0;
+    int sirka = 0;
     printf("Zadaj sirku:\n");
     scanf("%d", &sirka);
     printf("Zadaj vysku:\n");
     scanf("%d", &vyska);
+    mapa_init(mapa, sirka, vyska, NULL); //TODO doplnit  este vietor namiesto NULL
     char biotop = ' ';
     for (int i = 0; i < vyska; ++i) {
         for (int j = 0; j < sirka; ++j) {
             while (true) {
                 printf("Riadok %d\n", i);
                 printf("Stlpec %d\n", j);
-                printf("Zadajte biotop :");
-                scanf("%c", &biotop);
-                printf("\n");
+                printf("Zadajte biotop : ");
+                scanf(" %c", &biotop);
+
                 if (biotop == 'F' || biotop == 'P' || biotop == 'W' || biotop == 'M') {
                     mapa->mapa[i][j].biotop = biotop;
                     mapa->mapa[i][j].ohen  = false;
@@ -274,13 +276,15 @@ void mapa_rucne(MAPA * mapa) {
                     printf("Zadaný biotop bol nespravny!\n");
                     printf("Riadok %d\n", i);
                     printf("Stlpec %d\n", j);
-                    printf("Zadajte biotop :");
-                    scanf("%c", &biotop);
-                    printf("\n");
+                    printf("Zadajte biotop : ");
+                    scanf(" %c", &biotop);
+
                 }
             }
         }
     }
+
+
 }
 
 void ulozenie_mapy(MAPA mapa, char* nazovSuboru) {
