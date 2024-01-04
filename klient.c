@@ -184,6 +184,7 @@ void *menu(void *thr_data) {
         printf("Simulácia bola pozastavená:\n");
         printf("\tZadaj akciu:\n");
         printf("\t\tP: Pokračuj v simulácii\n");
+        printf("\t\tZ: Zapal bunku\n");
         printf("\t\tN: Nová simulacia\n");
         printf("\t\tU: Ulož aktuálnu simulaciu\n");
         printf("\t\tL: Načítaj novú simulaciu\n");
@@ -199,6 +200,9 @@ void *menu(void *thr_data) {
                 *data->je_pozastavena = false;
                 pthread_mutex_unlock(data->mapa_mutex);
                 pthread_cond_signal(data->bezi);
+                break;
+            case 'Z':
+                //TODO: Zapalenie bunky, pauznut + zadat suradnice zapalenej bunky + osetrit horlavost
                 break;
             case 'N':
                 zaciatocne_menu('Z', data);
