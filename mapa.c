@@ -249,7 +249,7 @@ void mapa_rucne(MAPA * mapa) {
     scanf("%d", &sirka);
     printf("Zadaj vysku:\n");
     scanf("%d", &vyska);
-    mapa_init(mapa, sirka, vyska, NULL); //TODO doplnit  este vietor namiesto NULL
+    mapa_init(mapa, sirka, vyska, NULL);
     char biotop = ' ';
     for (int i = 0; i < vyska; ++i) {
         for (int j = 0; j < sirka; ++j) {

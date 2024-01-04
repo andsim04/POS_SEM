@@ -8,12 +8,13 @@
 
 #ifndef POS_SEM_KLIENT_H
 #define POS_SEM_KLIENT_H
-
+// mozno spojit
 typedef struct simulacia_thread_data {
     MAPA* mapa;
     VIETOR * vietor;
     bool * je_pozastavena;
     bool * ukonci;
+    bool * nova_mapa;
     pthread_mutex_t* mapa_mutex;
     pthread_cond_t * pozastavena;
     pthread_cond_t * bezi;
@@ -25,6 +26,7 @@ typedef struct menu_thread_data {
     bool * je_pozastavena;
     bool * zaciatok;
     bool * ukonci;
+    bool * nova_mapa;
     pthread_mutex_t* mapa_mutex;
     pthread_cond_t * pozastavena;
     pthread_cond_t * bezi;

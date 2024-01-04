@@ -9,12 +9,19 @@ void *simulacia(void *thr_data) {
     SIMULACIA_THREAD_DATA *data = (SIMULACIA_THREAD_DATA *) thr_data;
     //TODO resetovat kolocount po pridani novej mapy
     int kolocount = 0;
-    while (true) { //TODO true vymenit za jeKoniec alebo co
+    while (*data->ukonci) {
         kolocount++;
         pthread_mutex_lock(data->mapa_mutex);
+        if (data->nova_mapa) {
+            kolocount = 1;
+            *data->nova_mapa = false;
+        }
         while (*data->je_pozastavena) {
             pthread_cond_signal(data->pozastavena);
             pthread_cond_wait(data->bezi, data->mapa_mutex);
+        }
+        if (!*data->ukonci) {
+            break;
         }
         BUNKA horiace_bunky[data->mapa->sirka * data->mapa->vyska];
         BUNKA zhorene_bunky[data->mapa->sirka * data->mapa->vyska];
@@ -129,8 +136,10 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
                 mapa_vykresli(*data->mapa);
             }
             *data->je_pozastavena = false;
+            *data->nova_mapa = true;
             pthread_mutex_unlock(data->mapa_mutex);
             pthread_cond_signal(data->bezi);
+
             break;
         case 'L':
 
@@ -139,7 +148,10 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
 
             break;
         case 'X':
-
+            *data->ukonci = false;
+            *data->je_pozastavena = false;
+            pthread_mutex_unlock(data->mapa_mutex);
+            pthread_cond_signal(data->bezi);
             break;
         default:
             printf("Zadany zlý parameter!\n");
@@ -151,10 +163,8 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
 
 void *menu(void *thr_data) {
     MENU_THREAD_DATA*data = (MENU_THREAD_DATA *) thr_data;
-    bool ukonci = true;
-    while (ukonci) {
+    while (*data->ukonci) {
         char akcia = ' ';
-        bool pozastavenie = false;
 
         pthread_mutex_lock(data->mapa_mutex);
         if (data->zaciatok) {
@@ -165,7 +175,6 @@ void *menu(void *thr_data) {
         while (akcia != 'H') {
             scanf(" %c", &akcia);
         }
-        //TODO: Pozastav simulaciu
         pthread_mutex_lock(data->mapa_mutex);
         *data->je_pozastavena = true;
         pthread_cond_wait(data->pozastavena, data->mapa_mutex);
@@ -193,6 +202,7 @@ void *menu(void *thr_data) {
                 break;
             case 'N':
                 zaciatocne_menu('Z', data);
+                *data->nova_mapa = true;
                 break;
             case 'U':
                 ulozenie_mapy(*data->mapa, "ulozisko.txt");
@@ -207,8 +217,10 @@ void *menu(void *thr_data) {
                 //TODO: Pripojenie na server
                 break;
             case 'X':
-                //TODO: Ukoncit program
                 *data->ukonci = false;
+                *data->je_pozastavena = false;
+                pthread_mutex_unlock(data->mapa_mutex);
+                pthread_cond_signal(data->bezi);
                 break;
             default:
                 printf("Zadany zlý parameter!\n");
@@ -234,6 +246,7 @@ int main() {
     bool je_pozastavena = false;
     bool ukonci = true;
     bool zaciatok = true;
+    bool nova_mapa = true;
 
 
     //==========init cast=========
@@ -254,6 +267,7 @@ int main() {
     menu_thread_data.zaciatok = &zaciatok;
     menu_thread_data.pozastavena = &pozastavena;
     menu_thread_data.ukonci = &ukonci;
+    menu_thread_data.nova_mapa = &nova_mapa;
 
     simulacia_thread_data.je_pozastavena = &je_pozastavena;
     simulacia_thread_data.mapa = &mapa;
@@ -262,6 +276,7 @@ int main() {
     simulacia_thread_data.vietor = &vietor;
     simulacia_thread_data.pozastavena = &pozastavena;
     simulacia_thread_data.ukonci = &ukonci;
+    simulacia_thread_data.nova_mapa = &nova_mapa;
 
     pthread_create(&thread_menu, NULL, menu, &menu_thread_data);
     pthread_create(&thread_simulacia, NULL, simulacia, &simulacia_thread_data);
