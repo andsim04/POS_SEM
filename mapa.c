@@ -281,16 +281,15 @@ void mapa_rucne(MAPA * mapa) {
             }
         }
     }
-
 }
 
 void ulozenie_mapy(MAPA mapa, char* nazovSuboru) {
     FILE *f = fopen(nazovSuboru, "w");
     if (f == NULL) {
-        perror("Problém s otvorením súboru\n");
+        perror("Problém s otvorením súboru!\n");
         return;
     }
-    // este nejako aby vypisalo konkretnu mapu, dat tam asi cislo  a podla nej ?
+    // TODO: este nejako aby vypisalo konkretnu mapu, dat tam asi cislo  a podla nej ?
     fprintf(f,"|");
     for (int i = 0; i < mapa.vyska; ++i) {
         for (int j = 0; j < mapa.sirka; ++j) {

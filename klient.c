@@ -15,6 +15,7 @@ void *simulacia(void *thr_data) {
         kolocount++;
         pthread_mutex_lock(data->mapa_mutex);
         while (!data->je_pozastavena) {
+            pthread_cond_signal(data->pozastavena);
             pthread_cond_wait(data->bezi, data->mapa_mutex);
         }
 
@@ -82,7 +83,6 @@ void *simulacia(void *thr_data) {
         //koniec krit sekcie
 
         printf("Pre pozastavenie simulácie zadajte 'H'\n");
-
         sleep(5);
     }
 }
@@ -95,123 +95,173 @@ void je_horlavy(MAPA mapa, int x, int y) { //pracovna verzia
     }
 }
 
+void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
+    if (akcia == ' ') {
+        printf("Zadaj akciu:\n");
+        printf("\tZ: Začni simulaciu\n");
+        printf("\tL: Načítaj simulacia\n");
+        printf("\tC: Pripojit sa na server\n");
+        printf("\tX: Ukonči program\n");
+    }
+    while (akcia != 'Z' && akcia != 'L' && akcia != 'C' && akcia != 'X') {
+        scanf("%c", &akcia);
+    }
+    switch (akcia) {
+        case 'Z':
+            printf("Zadajte akciu:\n");
+            printf("\t1: Vytvorit vlastnu mapu.\n");
+            printf("\t2: Vygenerovat mapu.\n");
+            while (akcia != '1' && akcia != '2') {
+                scanf("%c", &akcia);
+            }
+            if (akcia == '1') {
+                mapa_rucne(data->mapa);
+                mapa_vykresli(*data->mapa);
+            } else {
+                printf("Zadajte rozmery mapy:\n");
+                printf("\tSirka:\n");
+                int sirka;
+                scanf("%d", &sirka);
+                printf("\tVyska:\n");
+                int vyska;
+                scanf("%d", &vyska);
+                mapa_init(data->mapa, sirka, vyska, data->vietor);
+                mapa_vykresli(*data->mapa);
+            }
+            data->je_pozastavena = false;
+            pthread_mutex_unlock(data->mapa_mutex);
+            pthread_cond_signal(data->bezi);
+            break;
+        case 'L':
+
+            break;
+        case 'C':
+
+            break;
+        case 'X':
+
+            break;
+        default:
+            printf("Zadany zlý parameter!\n");
+            break;
+    }
+}
+
+
 
 void *menu(void *thr_data) {
-    MENU_THREAD_DATA *data = (MENU_THREAD_DATA *) thr_data;
+    MENU_THREAD_DATA*data = (MENU_THREAD_DATA *) thr_data;
     char akcia = ' ';
     bool pozastavenie = false;
 
+    pthread_mutex_lock(data->mapa_mutex);
     if (data->zaciatok) {
-        printf("Zadaj akciu:\n");
-        printf("\tS: Začni simulaciu\n");
-        printf("\tN: Načítaj simulacia\n");
-        printf("\tP: Pripojit sa na server\n");
-        printf("\tU: Ukonči program\n");
-        while(akcia == 'S' || akcia == 'N' || akcia == 'P' || akcia == 'U') {
-            scanf("%c", &akcia);
-        }
-        switch (akcia) {
-            case 'S':
-                printf("Zadajte akciu:\n");
-                printf("\t1: Vytvorit vlastnu mapu.\n");
-                printf("\t2: Vygenerovat mapu.\n");
-                while(akcia == '1' || akcia == '2') {
-                    scanf("%c", &akcia);
-                }
-                if (akcia == '1') {
-                    mapa_rucne(data->mapa);
-                } else {
-                    printf("Zadajte rozmery mapy:\n");
-                    printf("\tSirka:\n");
-                    int sirka;
-                    scanf("%d", &sirka);
-                    printf("\tVyska:\n");
-                    int vyska;
-                    scanf("%d", &vyska);
-                    mapa_init(data->mapa, sirka, vyska, data->vietor);
-                    mapa_vykresli(*data->mapa);
-                }
-                break;
-            case 'N':
-
-                break;
-            case 'P':
-
-                break;
-            case 'U':
-
-                break;
-        }
-
-
+        zaciatocne_menu(akcia, data);
         data->zaciatok = false;
     }
 
+    while (akcia != 'H') {
+        scanf("%c", &akcia);
+    }
+    //TODO: Pozastav simulaciu
+    pthread_mutex_lock(data->mapa_mutex);
+    *data->je_pozastavena = true;
+    pthread_cond_wait(data->pozastavena,data->mapa_mutex);
+    pthread_mutex_unlock(data->mapa_mutex);
+
+
+    printf("Simulácia bola pozastavená:\n");
+    printf("\tZadaj akciu:\n");
+    printf("\t\tP: Pokračuj v simulácii\n");
+    printf("\t\tN: Nová simulacia\n");
+    printf("\t\tU: Ulož aktuálnu simulaciu\n");
+    printf("\t\tL: Načítaj novú simulaciu\n");
+    printf("\t\tC: Pripojit sa na server\n");
+    printf("\t\tX: Ukonči program\n");
+
+    while (akcia != 'P' && akcia != 'N' && akcia != 'U' && akcia != 'L' && akcia != 'C' && akcia != 'X') {
+        scanf("%c", &akcia);
+    }
+    pthread_mutex_lock(data->mapa_mutex);
     switch (akcia) {
-        case 'S':
-            if (!pozastavenie) {
-                *data->je_pozastavena = true;
-                pozastavenie = true;
-            } else {
-                *data->je_pozastavena = false;
-                pozastavenie = false;
-            }
+        case 'P':
+            data->je_pozastavena = false;
+            pthread_mutex_unlock(data->mapa_mutex);
+            pthread_cond_signal(data->bezi);
             break;
-        case 'Z':
-            //TODO: pozastav simulaciu
-            printf("Zadajte súradnice bunky, ktorú chcete zapáliť:\n");
-            printf("\tX:\n");
-            int x;
-            scanf("%d", &x);
-            printf("\tY:\n");
-            int y;
-            scanf("%d", &y);
-
-            mapa_rozsir_ohen(data->mapa, x, y, data->vietor->smer); // kontrolu ci je horlave
-
+        case 'N':
+            zaciatocne_menu('Z', data);
             break;
         case 'U':
-            printf("Ukončujem program.\n");
+            ulozenie_mapy(*data->mapa, "ulozisko.txt");
+            data->je_pozastavena = false;
+            pthread_mutex_unlock(data->mapa_mutex);
+            pthread_cond_signal(data->bezi);
+            break;
+        case 'L':
+            //TODO: Load novej simulacie
+            break;
+        case 'C':
+            //TODO: Pripojenie na server
+            break;
+        case 'X':
+            //TODO: Ukoncit program
             break;
         default:
-            printf("Zadali ste zlú akciu\n");
+            printf("Zadany zlý parameter!\n");
             break;
     }
-
+    pthread_mutex_unlock(data->mapa_mutex);
 }
 
 int main() {
 
     srand(time(NULL));
     //==========deklar cast=======
+    pthread_t thread_menu, thread_simulacia;
     MAPA mapa;
     VIETOR vietor;
-    SIMULACIA_THREAD_DATA thread_data;
+
+    SIMULACIA_THREAD_DATA simulacia_thread_data;
+    MENU_THREAD_DATA menu_thread_data;
     pthread_mutex_t mapa_mutex;
     pthread_cond_t bezi;
+    pthread_cond_t pozastavena;
     bool je_pozastavena = false;
     bool je_ukonceny = false;
-
+    bool zaciatok = true;
 
 
     //==========init cast=========
     vietor.smer = 0;
     vietor.trvanie = 0;
-    //TODO: toto pojde prec
-    mapa_init(&mapa, 10, 6, &vietor);
-    //
+
+    //mapa_init(&mapa, 10, 6, &vietor);
+
     pthread_mutex_init(&mapa_mutex, NULL);
     pthread_cond_init(&bezi, NULL);
+    pthread_cond_init(&pozastavena, NULL);
 
-    thread_data.je_pozastavena = &je_pozastavena;
-    thread_data.mapa = &mapa;
-    thread_data.mapa_mutex = &mapa_mutex;
-    thread_data.bezi = &bezi;
-    thread_data.vietor = &vietor;
+    menu_thread_data.je_pozastavena = &je_pozastavena;
+    menu_thread_data.mapa = &mapa;
+    menu_thread_data.mapa_mutex = &mapa_mutex;
+    menu_thread_data.bezi = &bezi;
+    menu_thread_data.vietor = &vietor;
+    menu_thread_data.zaciatok = &zaciatok;
+    menu_thread_data.pozastavena = &pozastavena;
 
-    //========Logika cast========
+    simulacia_thread_data.je_pozastavena = &je_pozastavena;
+    simulacia_thread_data.mapa = &mapa;
+    simulacia_thread_data.mapa_mutex = &mapa_mutex;
+    simulacia_thread_data.bezi = &bezi;
+    simulacia_thread_data.vietor = &vietor;
+    menu_thread_data.pozastavena = &pozastavena;
+
+    pthread_create(&thread_menu, NULL, menu, &menu_thread_data);
+    pthread_create(&thread_simulacia, NULL, simulacia, &simulacia_thread_data);
+
+    /*========Logika cast========
     mapa_vykresli(mapa);
-
     for (int i = 0; i < 5; ++i) {
         int zapal2 = rand() % 10;
         int zapal1 = rand() % 6;
@@ -220,16 +270,20 @@ int main() {
             printf("Zapalene policko: [%d, %d]\n", zapal1, zapal2);
         }
     }
-
-    //mapa_vykresli(mapa);
-
-    simulacia(&thread_data);
-
     mapa_vykresli(mapa);
+    simulacia(&simulacia_thread_data);
+    mapa_vykresli(mapa);
+    */
 
     //=========Destroy casti==========
+    pthread_join(thread_simulacia, NULL);
+    pthread_join(thread_menu, NULL);
+
     mapa_destroy(&mapa);
     pthread_mutex_destroy(&mapa_mutex);
+
+    pthread_cond_destroy(&bezi);
+    pthread_cond_destroy(&pozastavena);
 
     return 0;
 

@@ -14,7 +14,7 @@ typedef struct simulacia_thread_data {
     VIETOR * vietor;
     bool * je_pozastavena;
     pthread_mutex_t* mapa_mutex;
-    pthread_cond_t * zastavena;
+    pthread_cond_t * pozastavena;
     pthread_cond_t * bezi;
 } SIMULACIA_THREAD_DATA;
 
@@ -22,14 +22,15 @@ typedef struct menu_thread_data {
     MAPA* mapa;
     VIETOR * vietor;
     bool * je_pozastavena;
-    bool zaciatok;
+    bool * zaciatok;
     pthread_mutex_t* mapa_mutex;
     pthread_cond_t * pozastavena;
-    pthread_cond_t * iduca;
+    pthread_cond_t * bezi;
 } MENU_THREAD_DATA;
 
 void* simulacia(void* thr_data);
 void* menu(void* thr_data);
 int main();
+void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data);
 
 #endif //POS_SEM_KLIENT_H
