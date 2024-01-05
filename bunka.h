@@ -6,6 +6,8 @@
 #ifndef POS_SEM_BUNKA_H
 #define POS_SEM_BUNKA_H
 
+
+
 typedef struct bunka {
     int x;
     int y;

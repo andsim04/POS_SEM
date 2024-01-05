@@ -295,26 +295,84 @@ void ulozenie_mapy(MAPA mapa, char* nazovSuboru) {
     }
     // TODO: este nejako aby vypisalo konkretnu mapu, dat tam asi cislo  a podla nej ?
     for (int i = 0; i < mapa.vyska; ++i) {
-        fprintf(f, "|");
         for (int j = 0; j < mapa.sirka; ++j) {
-            if ((j + 1) == mapa.sirka) {
-                fprintf(f, "%c", mapa.mapa[i][j].biotop);
-                fprintf(f,"|");
-            } else {
-                fprintf(f, "%c", mapa.mapa[i][j].biotop);
-                fprintf(f, "-");
-            }
-
+            fprintf(f, "%c", mapa.mapa[i][j].biotop);
         }
         fprintf(f, "\n");
     }
     fprintf(f, "\n");
     printf("Mapa bola ulozena!\n");
     fclose(f);
+
 }
 
-
-
 void nacitanie_mapy(MAPA* mapa, char* nazovSuboru) {
+    MAPA nacitane_mapy[20];
+    int pocet_map = 0;
+    FILE *f = fopen(nazovSuboru, "r");
+    const unsigned MAX_DLZKA = 100;
+    char buffer[MAX_DLZKA];
+
+    int sirka = 0;
+    int vyska = 0;
+    int sirka_mapy = 0;
+    int vyska_mapy = 0;
+    /*
+    char biotop = 0;
+    bool ohen = false;
+    bool zhorena = false;
+    bool horlavy = false;
+     */
+    BUNKA bunky[10][10]; //TODO zistit preco nejdu konstanty
+    if (f == NULL) {
+        perror("Subor neexistuje!\n");
+    }
+    while (!feof(f)) {
+        if (fgets(buffer, MAX_DLZKA, f)) {
+            for (int i = 0; i < MAX_DLZKA; ++i) {
+                if (buffer[i] == '\n') {
+                    break;
+                }
+                if (buffer[i] == 'F' || buffer[i] == 'M' || buffer[i] == 'P' || buffer[i] == 'W') {
+                    bunky[vyska][sirka].biotop = buffer[i];
+                    bunky[vyska][sirka].ohen = false;
+                    bunky[vyska][sirka].zhorena = false;
+                    bunky[vyska][sirka].x = vyska;
+                    bunky[vyska][sirka].y = sirka;
+                    if (buffer[i] == 'P' || buffer[i] == 'F') {
+                        bunky[vyska][sirka].horlavy = true;
+                    } else {
+                        bunky[vyska][sirka].horlavy = false;
+                    }
+                    sirka++;
+                } else {
+                    sirka_mapy = sirka;
+                    vyska++;
+                    vyska_mapy++;
+                }
+            }
+
+
+
+        } else {
+            mapa_init(&nacitane_mapy[pocet_map], sirka_mapy, vyska_mapy, NULL);
+            for (int i = 0; i < vyska_mapy; ++i) {
+                for (int j = 0; j < sirka_mapy; ++j) {
+                    nacitane_mapy[pocet_map].mapa[i][j] = bunky[i][j];
+                }
+            }
+            nacitane_mapy[pocet_map].sirka = sirka_mapy;
+            nacitane_mapy[pocet_map].vyska = vyska_mapy;
+            nacitane_mapy[pocet_map].vietor = NULL;
+            pocet_map++;
+            sirka = 0;
+            vyska = 0;
+            sirka_mapy = 0;
+            vyska_mapy = 0;
+        }
+
+
+    }
+
 
 }

@@ -226,6 +226,9 @@ void *menu(void *thr_data) {
                 menu_prerusenie = true;
                 break;
             case 'L':
+                nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt" );
+                pthread_mutex_unlock(data->mapa_mutex);
+                menu_prerusenie = true;
                 //TODO: Load novej simulacie
                 break;
             case 'C':
