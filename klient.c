@@ -12,7 +12,7 @@ void *simulacia(void *thr_data) {
     while (*data->ukonci) {
         kolocount++;
         pthread_mutex_lock(data->mapa_mutex);
-        if (data->nova_mapa) {
+        if (*data->nova_mapa) {
             kolocount = 1;
             *data->nova_mapa = false;
         }
@@ -163,6 +163,7 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
 
 void *menu(void *thr_data) {
     MENU_THREAD_DATA*data = (MENU_THREAD_DATA *) thr_data;
+    bool menu_prerusenie = false;
     while (*data->ukonci) {
         char akcia = ' ';
 
@@ -172,13 +173,19 @@ void *menu(void *thr_data) {
             data->zaciatok = false;
         }
         pthread_mutex_unlock(data->mapa_mutex);
-        while (akcia != 'H') {
-            scanf(" %c", &akcia);
+        if (!menu_prerusenie) {
+            while (akcia != 'H') {
+                scanf(" %c", &akcia);
+            }
         }
-        pthread_mutex_lock(data->mapa_mutex);
-        *data->je_pozastavena = true;
-        pthread_cond_wait(data->pozastavena, data->mapa_mutex);
-        pthread_mutex_unlock(data->mapa_mutex);
+        if (!menu_prerusenie) {
+            pthread_mutex_lock(data->mapa_mutex);
+            *data->je_pozastavena = true;
+            pthread_cond_wait(data->pozastavena, data->mapa_mutex);
+            pthread_mutex_unlock(data->mapa_mutex);
+        } else {
+            menu_prerusenie = false;
+        }
 
 
         printf("Simulácia bola pozastavená:\n");
@@ -209,10 +216,14 @@ void *menu(void *thr_data) {
                 *data->nova_mapa = true;
                 break;
             case 'U':
-                ulozenie_mapy(*data->mapa, "ulozisko.txt");
+                ulozenie_mapy(*data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
+                /*
                 *data->je_pozastavena = false;
-                pthread_mutex_unlock(data->mapa_mutex);
+
                 pthread_cond_signal(data->bezi);
+                 */
+                pthread_mutex_unlock(data->mapa_mutex);
+                menu_prerusenie = true;
                 break;
             case 'L':
                 //TODO: Load novej simulacie
