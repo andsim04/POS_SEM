@@ -156,21 +156,45 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
     }
 }
 
-void zapal_bunky(void* thr_data) {
+void zapal_bunky(void* thr_data) { //TODO zaseklo sa  tak to treba opravit
     MENU_THREAD_DATA*data = (MENU_THREAD_DATA *) thr_data;
     int riadok = 0;
     int stlpec = 0;
-    while (true) {
+    bool hotovo = false;
+    while (!hotovo) {
         printf("Zadajte riadok: \n");
         scanf("%d", &riadok);
         printf("Zadajte stlpec: \n");
         scanf("%d", &stlpec);
         if ((riadok > 0 && riadok <= data->mapa->vyska) && (stlpec > 0 && stlpec <= data->mapa->sirka)) {
             if(data->mapa->mapa[riadok][stlpec].horlavy) {
+                data->mapa->mapa[riadok][stlpec].biotop = 'O';
+                data->mapa->mapa[riadok][stlpec].ohen = true;
+                data->mapa->mapa[riadok][stlpec].horlavy = false;
+                printf("Policko na suradniciach [%d,%d]\n", riadok, stlpec);
+                char volba = ' ';
+                while (true) {
+                    printf("Chcete zadat dalsie policko A/N?\n");
+                    scanf(" %c", &volba);
+                    if (volba == 'A') {
+                        break;
+                    } else if (volba == 'N') {
+                        hotovo = true;
+                        break;
+                    } else {
+                        printf("Nespravny vstup!\n");
+                    }
+                }
 
+            } else {
+                printf("Policko je nehorlave!\n");
             }
+        } else {
+            printf("Nespravne suradnice!\n");
         }
     }
+
+    mapa_vykresli(*data->mapa);
 }
 
 
@@ -229,7 +253,6 @@ void *menu(void *thr_data) {
                 //TODO: Zapalenie bunky, pauznut + zadat suradnice zapalenej bunky + osetrit horlavost
                 zapal_bunky(data);
                 *data->je_pozastavena = true;
-                *data->nova_mapa = true;
                 menu_prerusenie = true;
 
                 break;
