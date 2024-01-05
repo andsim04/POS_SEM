@@ -4,6 +4,18 @@
 
 #include "mapa.h"
 
+void mapa_init2(MAPA* mapa, int sirka, int vyska, VIETOR* vietor) {
+    mapa->sirka = sirka;
+    mapa->vyska = vyska;
+    mapa->vietor = vietor;
+
+    mapa->mapa = calloc(vyska, sizeof(BUNKA *));
+
+    for (int i = 0; i < vyska; i++) {
+        mapa->mapa[i] = calloc(sirka, sizeof(BUNKA));
+    }
+}
+
 void mapa_init(MAPA* mapa, int sirka, int vyska, VIETOR * vietor) {
     mapa->sirka = sirka;
     mapa->vyska = vyska;
@@ -310,6 +322,7 @@ void ulozenie_mapy(MAPA mapa, char* nazovSuboru) {
 void nacitanie_mapy(MAPA* mapa, char* nazovSuboru) {
     MAPA nacitane_mapy[20];
     int pocet_map = 0;
+    int cislo_mapy = 0;
     FILE *f = fopen(nazovSuboru, "r");
     char znak = ' ';
     int sirka = 0;

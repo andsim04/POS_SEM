@@ -21,6 +21,7 @@ typedef struct mapa {
 
 } MAPA;
 
+void mapa_init2(MAPA* mapa, int sirka, int vyska, VIETOR* vietor);
 void mapa_init(MAPA* mapa, int sirka, int vyska, VIETOR* vietor);
 void vytvorenie_mapy_rucne(int x, int y);
 void ulozenie_mapy(MAPA mapa, char* nazovSuboru);

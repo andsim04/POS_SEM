@@ -94,13 +94,7 @@ void *simulacia(void *thr_data) {
     }
 }
 
-void je_horlavy(MAPA mapa, int x, int y) { //pracovna verzia
-    if (mapa.mapa[x][y].horlavy) {
-        //vlozit do zasobnika a vybrat na zaciatku kola
-    } else {
-        printf("Bunka na suradniciah %d %d nezacala horiet pretoze je to biotop %c \n", x, y, mapa.mapa[x][y].biotop);
-    }
-}
+
 
 void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
     if (akcia == ' ') {
@@ -142,7 +136,10 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
 
             break;
         case 'L':
-
+            *data->je_pozastavena = true;
+            *data->nova_mapa = true;
+            nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt" );
+            pthread_mutex_unlock(data->mapa_mutex);
             break;
         case 'C':
 
@@ -156,6 +153,23 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
         default:
             printf("Zadany zlý parameter!\n");
             break;
+    }
+}
+
+void zapal_bunky(void* thr_data) {
+    MENU_THREAD_DATA*data = (MENU_THREAD_DATA *) thr_data;
+    int riadok = 0;
+    int stlpec = 0;
+    while (true) {
+        printf("Zadajte riadok: \n");
+        scanf("%d", &riadok);
+        printf("Zadajte stlpec: \n");
+        scanf("%d", &stlpec);
+        if ((riadok > 0 && riadok <= data->mapa->vyska) && (stlpec > 0 && stlpec <= data->mapa->sirka)) {
+            if(data->mapa->mapa[riadok][stlpec].horlavy) {
+
+            }
+        }
     }
 }
 
@@ -213,6 +227,11 @@ void *menu(void *thr_data) {
                 break;
             case 'Z':
                 //TODO: Zapalenie bunky, pauznut + zadat suradnice zapalenej bunky + osetrit horlavost
+                zapal_bunky(data);
+                *data->je_pozastavena = true;
+                *data->nova_mapa = true;
+                menu_prerusenie = true;
+
                 break;
             case 'N':
                 zaciatocne_menu('Z', data);
@@ -220,19 +239,15 @@ void *menu(void *thr_data) {
                 break;
             case 'U':
                 ulozenie_mapy(*data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
-                /*
-                *data->je_pozastavena = false;
-
-                pthread_cond_signal(data->bezi);
-                 */
                 pthread_mutex_unlock(data->mapa_mutex);
                 menu_prerusenie = true;
                 break;
             case 'L':
+                *data->je_pozastavena = true;
+                *data->nova_mapa = true;
                 nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt" );
                 pthread_mutex_unlock(data->mapa_mutex);
                 menu_prerusenie = true;
-                //TODO: Load novej simulacie
                 break;
             case 'C':
                 //TODO: Pripojenie na server
