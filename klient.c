@@ -215,7 +215,7 @@ void *menu(void *thr_data) {
         printf("\t\tC: Pripojit sa na server\n");
         printf("\t\tX: Ukonči program\n");
 
-        while (akcia != 'P' && akcia != 'N' && akcia != 'U' && akcia != 'L' && akcia != 'C' && akcia != 'X') {
+        while (akcia != 'P' && akcia != 'Z' && akcia != 'N' && akcia != 'X' && akcia != 'U' && akcia != 'L' && akcia != 'C' && akcia != 'X') {
             scanf("%c", &akcia);
         }
         pthread_mutex_lock(data->mapa_mutex);
@@ -318,20 +318,14 @@ int main() {
     }
 
     // Zaslanie príkazu na server
-    const char* command = "do_something1";
+    const char* command = "do_something";
     ssize_t bytesSent = send(clientSocket, command, strlen(command), 0);
     if (bytesSent == -1) {
         perror("Error sending data");
         close(clientSocket);
         exit(EXIT_FAILURE);
     }
-    const char* command1 = "do_something2";
-    ssize_t bytesSent1 = send(clientSocket, command1, strlen(command1), 0);
-    if (bytesSent1 == -1) {
-        perror("Error sending data");
-        close(clientSocket);
-        exit(EXIT_FAILURE);
-    }
+
     vietor.smer = 0;
     vietor.trvanie = 0;
 

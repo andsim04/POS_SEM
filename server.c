@@ -62,7 +62,6 @@ int main() {
     }
     printf("Server počúva na porte: %d\n", PORT);
 
-    while (server_zapnuty) {
         //Prijatie pripojenia
         //na accept() server ostane stáť a čaká kým sa nenaviaže spojenie s klientom,
         //v momente ako sa naviaže spojenie server začne pokračovať.
@@ -76,6 +75,7 @@ int main() {
 
         printf("Klienta sa napojil z adresy %s:%d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
 
+    while (server_zapnuty) {
         //Prijímanie dát od klienta
         ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
         if (bytesRead == -1) {
@@ -83,13 +83,13 @@ int main() {
             close(clientSocket);
             continue;
         }
-        printf("Prijaté dáta od klienta: %.*s\n", (int) bytesRead, buffer);
+        printf("Prijaté dáta od klienta: %s\n", buffer);
         buffer[bytesRead] = '\0';
         vykonaj_prikaz(buffer, &server_zapnuty);
-        close(clientSocket);
 
     }
 
+    close(clientSocket);
     close(serverSocket);
     return 0;
 }
