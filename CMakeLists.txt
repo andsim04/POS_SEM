@@ -7,6 +7,12 @@ add_executable(POS_SEM
         bunka.h
         klient.c
         klient.h
+        mapa.c
+        mapa.h
+        bunka.c)
+
+add_executable(Server
+        bunka.h
         server.c
         server.h
         mapa.c
