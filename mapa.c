@@ -288,14 +288,14 @@ void mapa_rucne(MAPA * mapa) {
 }
 
 void ulozenie_mapy(MAPA mapa, char* nazovSuboru) {
-    FILE *f = fopen(nazovSuboru, "w");
+    FILE *f = fopen(nazovSuboru, "a");
     if (f == NULL) {
         perror("Problém s otvorením súboru!\n");
         return;
     }
     // TODO: este nejako aby vypisalo konkretnu mapu, dat tam asi cislo  a podla nej ?
-    fprintf(f,"|");
     for (int i = 0; i < mapa.vyska; ++i) {
+        fprintf(f, "|");
         for (int j = 0; j < mapa.sirka; ++j) {
             if ((j + 1) == mapa.sirka) {
                 fprintf(f, "%c", mapa.mapa[i][j].biotop);
@@ -306,8 +306,9 @@ void ulozenie_mapy(MAPA mapa, char* nazovSuboru) {
             }
 
         }
-        //fprintf(f, "\n");
+        fprintf(f, "\n");
     }
+    fprintf(f, "\n");
     printf("Mapa bola ulozena!\n");
     fclose(f);
 }

@@ -1,0 +1,14 @@
+
+
+|P-W-W-P|
+|W-F-M-P|
+|W-M-W-F|
+|P-W-F-M|
+|F-W-M-W|
+
+|P-W-W-P|
+|W-F-M-P|
+|W-M-W-F|
+|P-W-F-M|
+|F-W-M-W|
+
