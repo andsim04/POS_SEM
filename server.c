@@ -8,12 +8,13 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
+#include <string.h>
 
 void vykonaj_prikaz(char* prikaz, bool* server_zapnuty) {
-    if (prikaz == "vypni") {
+    if (strcmp(prikaz, "Vypni") == 0) {
         *server_zapnuty = false;
     }
-    printf("Server vykonal prikaz: %s", prikaz);
+    printf("Server vykonal prikaz: %s\n", prikaz);
 }
 
 int main() {
@@ -59,7 +60,6 @@ int main() {
         close(serverSocket);
         exit(EXIT_FAILURE);
     }
-
     printf("Server počúva na porte: %d\n", PORT);
 
     while (server_zapnuty) {
@@ -84,10 +84,10 @@ int main() {
             continue;
         }
         printf("Prijaté dáta od klienta: %.*s\n", (int) bytesRead, buffer);
-
+        buffer[bytesRead] = '\0';
         vykonaj_prikaz(buffer, &server_zapnuty);
-
         close(clientSocket);
+
     }
 
     close(serverSocket);

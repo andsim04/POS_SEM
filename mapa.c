@@ -38,6 +38,7 @@ void mapa_init(MAPA* mapa, int sirka, int vyska, VIETOR * vietor) {
             }
         }
     }
+    mapa->je_inicializovana = true;
 }
 
 void mapa_vykresli(MAPA mapa) {
@@ -310,69 +311,79 @@ void nacitanie_mapy(MAPA* mapa, char* nazovSuboru) {
     MAPA nacitane_mapy[20];
     int pocet_map = 0;
     FILE *f = fopen(nazovSuboru, "r");
-    const unsigned MAX_DLZKA = 100;
-    char buffer[MAX_DLZKA];
-
+    char znak = ' ';
     int sirka = 0;
     int vyska = 0;
+    const unsigned int odpad = 1;
+    char prazdnyRiadok[odpad];
     int sirka_mapy = 0;
     int vyska_mapy = 0;
-    /*
-    char biotop = 0;
-    bool ohen = false;
-    bool zhorena = false;
-    bool horlavy = false;
-     */
-    BUNKA bunky[10][10]; //TODO zistit preco nejdu konstanty
-    if (f == NULL) {
-        perror("Subor neexistuje!\n");
-    }
+    BUNKA bunky[10][10];
     while (!feof(f)) {
-        if (fgets(buffer, MAX_DLZKA, f)) {
-            for (int i = 0; i < MAX_DLZKA; ++i) {
-                if (buffer[i] == '\n') {
-                    break;
-                }
-                if (buffer[i] == 'F' || buffer[i] == 'M' || buffer[i] == 'P' || buffer[i] == 'W') {
-                    bunky[vyska][sirka].biotop = buffer[i];
-                    bunky[vyska][sirka].ohen = false;
-                    bunky[vyska][sirka].zhorena = false;
-                    bunky[vyska][sirka].x = vyska;
-                    bunky[vyska][sirka].y = sirka;
-                    if (buffer[i] == 'P' || buffer[i] == 'F') {
-                        bunky[vyska][sirka].horlavy = true;
-                    } else {
-                        bunky[vyska][sirka].horlavy = false;
-                    }
-                    sirka++;
-                } else {
-                    sirka_mapy = sirka;
-                    vyska++;
-                    vyska_mapy++;
-                }
+        znak = (char) fgetc(f);
+        if (znak == 'P' || znak == 'F' || znak == 'M' || znak == 'W') {
+            bunky[vyska][sirka].biotop = znak;
+            bunky[vyska][sirka].zhorena = false;
+            bunky[vyska][sirka].ohen = false;
+            bunky[vyska][sirka].x = vyska;
+            bunky[vyska][sirka].y = sirka;
+            if (znak == 'F' || znak == 'P') {
+                bunky[vyska][sirka].horlavy = true;
+            } else {
+                bunky[vyska][sirka].horlavy = false;
             }
+            sirka++;
 
+        } else if (znak == '\n'  && sirka != 0) {
+            fgets(prazdnyRiadok, odpad, f);
+            vyska++;
 
-
-        } else {
+            if (pocet_map == cislo_mapy) {
+                sirka_mapy = sirka;
+                cislo_mapy++;
+            }
+            sirka = 0;
+        } else if (znak == '\n'  && sirka == 0 && pocet_map != cislo_mapy) {
+            vyska_mapy = vyska;
             mapa_init(&nacitane_mapy[pocet_map], sirka_mapy, vyska_mapy, NULL);
-            for (int i = 0; i < vyska_mapy; ++i) {
+            for (int i = 0; i < vyska_mapy; i++) {
                 for (int j = 0; j < sirka_mapy; ++j) {
-                    nacitane_mapy[pocet_map].mapa[i][j] = bunky[i][j];
+                    nacitane_mapy[pocet_map].mapa[i][j].biotop = bunky[i][j].biotop;
+                    nacitane_mapy[pocet_map].mapa[i][j].horlavy = bunky[i][j].horlavy;
+                    nacitane_mapy[pocet_map].mapa[i][j].ohen = bunky[i][j].ohen;
+                    nacitane_mapy[pocet_map].mapa[i][j].zhorena = bunky[i][j].zhorena;
+                    nacitane_mapy[pocet_map].mapa[i][j].x = bunky[i][j].x;
+                    nacitane_mapy[pocet_map].mapa[i][j].y = bunky[i][j].y;
                 }
             }
             nacitane_mapy[pocet_map].sirka = sirka_mapy;
             nacitane_mapy[pocet_map].vyska = vyska_mapy;
             nacitane_mapy[pocet_map].vietor = NULL;
-            pocet_map++;
-            sirka = 0;
             vyska = 0;
-            sirka_mapy = 0;
+            sirka = 0;
             vyska_mapy = 0;
+            sirka_mapy = 0;
+            pocet_map++;
+            fgets(prazdnyRiadok, odpad, f);
+        } else {
+            fgets(prazdnyRiadok, odpad, f);
         }
-
-
+    }
+    fclose(f);
+    for (int i = 0; i < pocet_map; ++i) {
+        printf("===Cislo mapy %d===\n", i);
+        mapa_vykresli(nacitane_mapy[i]);
+    }
+    int vyber_mapa = 0;
+    //TODO opatrenia voci nespravnemu vstupu
+    printf("Vyberte cislo mapy: \n");
+    scanf("%d", &vyber_mapa);
+    if (vyber_mapa > 0 && vyber_mapa <= pocet_map) {
+        mapa_destroy(mapa);
+        mapa_init2(mapa, nacitane_mapy[vyber_mapa - 1].sirka, nacitane_mapy[vyber_mapa - 1].vyska, NULL);
+        *mapa = nacitane_mapy[vyber_mapa - 1];
     }
 
+    printf("Mapa cislo %d bola nacitana!\n", vyber_mapa);
 
 }

@@ -15,6 +15,7 @@ typedef struct vietor {
 typedef struct mapa {
     int sirka;
     int vyska;
+    bool je_inicializovana;
     BUNKA** mapa;
     VIETOR * vietor;
 

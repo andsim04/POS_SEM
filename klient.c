@@ -171,6 +171,9 @@ void *menu(void *thr_data) {
         if (data->zaciatok) {
             zaciatocne_menu(akcia, data);
             data->zaciatok = false;
+            if (!*data->ukonci) {
+                break;
+            }
         }
         pthread_mutex_unlock(data->mapa_mutex);
         if (!menu_prerusenie) {
@@ -249,11 +252,17 @@ void *menu(void *thr_data) {
 }
 
 int main() {
-
     srand(time(NULL));
     //==========deklar cast=======
+    int PORT = 99887;
+    int BUFFER_SIZE = 1024;
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+    char buffer[BUFFER_SIZE];
+
     pthread_t thread_menu, thread_simulacia;
     MAPA mapa;
+    mapa.je_inicializovana = false;
     VIETOR vietor;
 
     SIMULACIA_THREAD_DATA simulacia_thread_data;
@@ -268,6 +277,46 @@ int main() {
 
 
     //==========init cast=========
+
+    //Vytvorenie socketu pre klient
+    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+    if (clientSocket == -1) {
+        perror("Error creating socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Nastavenie IP adresy
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(PORT);
+    //inet_pton premeni stringový format IP adresy na binarny format
+    if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
+        perror("Error configuring server address");
+        close(clientSocket);
+        exit(EXIT_FAILURE);
+    }
+
+    // Pripojenie na server
+    if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
+        perror("Error connecting to server");
+        close(clientSocket);
+        exit(EXIT_FAILURE);
+    }
+
+    // Zaslanie príkazu na server
+    const char* command = "do_something1";
+    ssize_t bytesSent = send(clientSocket, command, strlen(command), 0);
+    if (bytesSent == -1) {
+        perror("Error sending data");
+        close(clientSocket);
+        exit(EXIT_FAILURE);
+    }
+    const char* command1 = "do_something2";
+    ssize_t bytesSent1 = send(clientSocket, command1, strlen(command1), 0);
+    if (bytesSent1 == -1) {
+        perror("Error sending data");
+        close(clientSocket);
+        exit(EXIT_FAILURE);
+    }
     vietor.smer = 0;
     vietor.trvanie = 0;
 
@@ -318,12 +367,22 @@ int main() {
     pthread_join(thread_simulacia, NULL);
     pthread_join(thread_menu, NULL);
 
-    mapa_destroy(&mapa);
+    if (mapa.je_inicializovana) {
+        mapa_destroy(&mapa);
+    }
     pthread_mutex_destroy(&mapa_mutex);
 
     pthread_cond_destroy(&bezi);
     pthread_cond_destroy(&pozastavena);
 
+    //Ukoncenie servera pomocou príkazu
+    ssize_t prikaz_vypnutia = send(clientSocket, "Vypni", strlen("Vypni"), 0);
+    if (prikaz_vypnutia == -1) {
+        perror("Error sending data");
+        close(clientSocket);
+        exit(EXIT_FAILURE);
+    }
+    close(clientSocket);
     return 0;
 
 }
