@@ -384,7 +384,7 @@ void nacitanie_mapy(MAPA* mapa, char* nazovSuboru) {
     }
     fclose(f);
     for (int i = 0; i < pocet_map; ++i) {
-        printf("===Cislo mapy %d===\n", i);
+        printf("===Cislo mapy %d===\n", i + 1);
         mapa_vykresli(nacitane_mapy[i]);
     }
     int vyber_mapa = 0;
@@ -392,7 +392,9 @@ void nacitanie_mapy(MAPA* mapa, char* nazovSuboru) {
     printf("Vyberte cislo mapy: \n");
     scanf("%d", &vyber_mapa);
     if (vyber_mapa > 0 && vyber_mapa <= pocet_map) {
-        mapa_destroy(mapa);
+        if (mapa->je_inicializovana) {
+            mapa_destroy(mapa);
+        }
         mapa_init2(mapa, nacitane_mapy[vyber_mapa - 1].sirka, nacitane_mapy[vyber_mapa - 1].vyska, NULL);
         *mapa = nacitane_mapy[vyber_mapa - 1];
     }

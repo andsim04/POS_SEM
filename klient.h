@@ -34,6 +34,7 @@ typedef struct menu_thread_data {
     bool * zaciatok;
     bool * ukonci;
     bool * nova_mapa;
+    bool * menu_prerusenie;
     pthread_mutex_t* mapa_mutex;
     pthread_cond_t * pozastavena;
     pthread_cond_t * bezi;

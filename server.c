@@ -18,7 +18,7 @@ void vykonaj_prikaz(char* prikaz, bool* server_zapnuty) {
 }
 
 int main() {
-    int PORT = 99887;
+    int PORT = 99883;
     int BUFFER_SIZE = 1024;
 
     bool server_zapnuty = true;
