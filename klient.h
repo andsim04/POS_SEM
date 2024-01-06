@@ -35,9 +35,12 @@ typedef struct menu_thread_data {
     bool * ukonci;
     bool * nova_mapa;
     bool * menu_prerusenie;
+    bool * je_pripojeny;
     pthread_mutex_t* mapa_mutex;
     pthread_cond_t * pozastavena;
     pthread_cond_t * bezi;
+    int clientSocket;
+    struct sockaddr_in* serverAddr;
 } MENU_THREAD_DATA;
 
 void* simulacia(void* thr_data);

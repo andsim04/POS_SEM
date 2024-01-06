@@ -1,8 +1,8 @@
 //
 // Created by andre on 2. 1. 2024.
 //
-
-#include "server.h"
+#include "bunka.h"
+#include "mapa.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -10,19 +10,61 @@
 #include <stdbool.h>
 #include <string.h>
 
-void vykonaj_prikaz(char* prikaz, bool* server_zapnuty) {
-    if (strcmp(prikaz, "Vypni") == 0) {
+void vykonaj_prikaz(int prikaz, bool* server_zapnuty, int clientSocket) {
+    if (prikaz == 0) {
+        printf("Vypinam\n");
         *server_zapnuty = false;
-    } else if (strcmp(prikaz, "Uloz") == 0) {
 
-    } else if (strcmp(prikaz, "Nacitaj") == 0) {
+    } else if (prikaz == 1) {
+        printf("Uloz\n");
+        MAPA mapa;
+        int sirka, vyska;
+
+        ssize_t sirka_ = recv(clientSocket, &sirka, sizeof(sirka), 0);
+        if (sirka_ == -1) {
+            perror("Chyba pri prijímaní dát");
+            close(clientSocket);
+        }
+        printf("Prijimam sirku: %d\n", sirka);
+        ssize_t vyska_ = recv(clientSocket, &vyska, sizeof(vyska), 0);
+        if (vyska_ == -1) {
+            perror("Chyba pri prijímaní dát");
+            close(clientSocket);
+        }
+        printf("Prijimam vyska: %d\n", vyska);
+
+        mapa_init2(&mapa, sirka, vyska, NULL);
+
+        // Receive the serialized data
+        char receivedMapa[vyska * sirka * sizeof(BUNKA)];
+        ssize_t mapa_ = recv(clientSocket, receivedMapa, sizeof(receivedMapa), 0);
+        if (mapa_ == -1) {
+            perror("Error receiving data");
+            close(clientSocket);
+            exit(EXIT_FAILURE);
+        }
+
+        // Deserializácia dát buniek
+        int k = 0;
+        for (int i = 0; i < vyska; ++i) {
+            for (int j = 0; j < sirka; ++j) {
+                memcpy(&mapa.mapa[i][j], &receivedMapa[k], sizeof(BUNKA));
+                k += sizeof(BUNKA);
+            }
+        }
+        mapa_vykresli(mapa);
+v        ulozenie_mapy(mapa, "../UlozeneMapy/ServerMapy.txt");
+
+        mapa_destroy(&mapa);
+
+    } else if (prikaz == 2) {
 
     }
-    printf("Server vykonal prikaz: %s\n", prikaz);
+    printf("Server vykonal prikaz: %d\n", prikaz);
 }
 
 int main() {
-    int PORT = 99888;
+    int PORT = 99887;
     int BUFFER_SIZE = 1024;
 
     bool je_pripojeny = false;
@@ -30,7 +72,7 @@ int main() {
     int serverSocket, clientSocket;
     struct sockaddr_in serverAddr, clientAddr;
     socklen_t addrSize = sizeof(struct sockaddr_in);
-    char buffer[BUFFER_SIZE];
+    int buffer;
 
     //Vytvorenie socketu
     //TCP socket komunikacia
@@ -85,20 +127,19 @@ int main() {
         }
 
         //Prijímanie dát od klienta
-        ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-        if (bytesRead == -1) {
+        ssize_t prikaz_ = recv(clientSocket, &buffer, sizeof(buffer), 0);
+        if (prikaz_ == -1) {
             perror("Chyba pri prijímaní dát");
             close(clientSocket);
             continue;
-        } else if (bytesRead == 0) {
+        } else if (prikaz_ == 0) {
             printf("Klient sa odpojil!\n");
             printf("Cakam na nového klienta.\n");
             je_pripojeny = false;
             continue;
         }
-        printf("Prijaté dáta od klienta: %s\n", buffer);
-        buffer[bytesRead] = '\0';
-        vykonaj_prikaz(buffer, &server_zapnuty);
+        printf("Prijaté dáta od klienta: %d\n", buffer);
+        vykonaj_prikaz(buffer, &server_zapnuty, clientSocket);
 
     }
 
