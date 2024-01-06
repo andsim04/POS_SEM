@@ -269,8 +269,8 @@ void *menu(void *thr_data) {
                 *data->je_pozastavena = true;
                 *data->nova_mapa = true;
                 nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt" );
-                pthread_mutex_unlock(data->mapa_mutex);
                 menu_prerusenie = true;
+                pthread_mutex_unlock(data->mapa_mutex);
                 break;
             case 'C':
                 //TODO: Pripojenie na server
