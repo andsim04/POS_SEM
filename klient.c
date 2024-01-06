@@ -7,6 +7,7 @@
 
 void *simulacia(void *thr_data) {
     SIMULACIA_THREAD_DATA *data = (SIMULACIA_THREAD_DATA *) thr_data;
+    //TODO resetovat kolocount po pridani novej mapy
     int kolocount = 0;
     while (*data->ukonci) {
         kolocount++;
@@ -30,7 +31,7 @@ void *simulacia(void *thr_data) {
         int rngVietor = (rand() % 101) + 1;
         if (data->vietor->trvanie == 0 && (rngVietor <= 10)) {
             data->vietor->smer = (rand() % 4) + 1;
-            data->vietor->trvanie = (rand() % 4) + 2;
+            data->vietor->trvanie = (rand() % 3) + 3;
         } else if (data->vietor->trvanie == 0 && (rngVietor > 10)) {
             data->vietor->smer = 0;
         }
@@ -130,7 +131,6 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
             }
             *data->je_pozastavena = false;
             *data->nova_mapa = true;
-            data->mapa->vietor = data->vietor;
             pthread_mutex_unlock(data->mapa_mutex);
             pthread_cond_signal(data->bezi);
 
@@ -139,8 +139,6 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
             *data->je_pozastavena = true;
             *data->nova_mapa = true;
             nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt" );
-            data->mapa->vietor = data->vietor;
-            *data->menu_prerusenie = true;
             pthread_mutex_unlock(data->mapa_mutex);
             break;
         case 'C':
@@ -163,7 +161,6 @@ void zapal_bunky(void* thr_data) { //TODO zaseklo sa  tak to treba opravit
     int riadok = 0;
     int stlpec = 0;
     bool hotovo = false;
-
     while (!hotovo) {
         printf("Zadajte riadok: \n");
         scanf("%d", &riadok);
@@ -204,6 +201,7 @@ void zapal_bunky(void* thr_data) { //TODO zaseklo sa  tak to treba opravit
 
 void *menu(void *thr_data) {
     MENU_THREAD_DATA*data = (MENU_THREAD_DATA *) thr_data;
+    bool menu_prerusenie = false;
     while (*data->ukonci) {
         char akcia = ' ';
 
@@ -216,18 +214,18 @@ void *menu(void *thr_data) {
             }
         }
         pthread_mutex_unlock(data->mapa_mutex);
-        if (!*data->menu_prerusenie) {
+        if (!menu_prerusenie) {
             while (akcia != 'H') {
                 scanf(" %c", &akcia);
             }
         }
-        if (!*data->menu_prerusenie) {
+        if (!menu_prerusenie) {
             pthread_mutex_lock(data->mapa_mutex);
             *data->je_pozastavena = true;
             pthread_cond_wait(data->pozastavena, data->mapa_mutex);
             pthread_mutex_unlock(data->mapa_mutex);
         } else {
-            *data->menu_prerusenie = false;
+            menu_prerusenie = false;
         }
 
 
@@ -241,8 +239,8 @@ void *menu(void *thr_data) {
         printf("\t\tC: Pripojit sa na server\n");
         printf("\t\tX: Ukonči program\n");
 
-        while (akcia != 'P' && akcia != 'Z' && akcia != 'N' && akcia != 'X' && akcia != 'U' && akcia != 'L' && akcia != 'C' && akcia != 'X') {
-            scanf(" %c", &akcia);
+        while (akcia != 'P' && akcia != 'Z' && akcia != 'N' && akcia != 'U' && akcia != 'L' && akcia != 'C' && akcia != 'X') {
+            scanf("%c", &akcia);
         }
         pthread_mutex_lock(data->mapa_mutex);
         switch (akcia) {
@@ -252,10 +250,11 @@ void *menu(void *thr_data) {
                 pthread_cond_signal(data->bezi);
                 break;
             case 'Z':
+                //TODO: Zapalenie bunky, pauznut + zadat suradnice zapalenej bunky + osetrit horlavost
                 zapal_bunky(data);
                 *data->je_pozastavena = true;
-                *data->menu_prerusenie = true;
-                pthread_mutex_unlock(data->mapa_mutex);
+                menu_prerusenie = true;
+
                 break;
             case 'N':
                 zaciatocne_menu('Z', data);
@@ -264,16 +263,14 @@ void *menu(void *thr_data) {
             case 'U':
                 ulozenie_mapy(*data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
                 pthread_mutex_unlock(data->mapa_mutex);
-                *data->menu_prerusenie = true;
+                menu_prerusenie = true;
                 break;
             case 'L':
                 *data->je_pozastavena = true;
                 *data->nova_mapa = true;
                 nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt" );
-                data->mapa->vietor = data->vietor;
-                *data->menu_prerusenie = true;
+                menu_prerusenie = true;
                 pthread_mutex_unlock(data->mapa_mutex);
-
                 break;
             case 'C':
                 //TODO: Pripojenie na server
@@ -295,11 +292,9 @@ void *menu(void *thr_data) {
 int main() {
     srand(time(NULL));
     //==========deklar cast=======
-    int PORT = 99883;
-    int BUFFER_SIZE = 1024;
+    int PORT = 99888;
     int clientSocket;
     struct sockaddr_in serverAddr;
-    char buffer[BUFFER_SIZE];
 
     pthread_t thread_menu, thread_simulacia;
     MAPA mapa;
@@ -315,7 +310,6 @@ int main() {
     bool ukonci = true;
     bool zaciatok = true;
     bool nova_mapa = true;
-    bool menu_prerusenie = false;
 
 
     //==========init cast=========
@@ -371,7 +365,6 @@ int main() {
     menu_thread_data.pozastavena = &pozastavena;
     menu_thread_data.ukonci = &ukonci;
     menu_thread_data.nova_mapa = &nova_mapa;
-    menu_thread_data.menu_prerusenie = &menu_prerusenie;
 
     simulacia_thread_data.je_pozastavena = &je_pozastavena;
     simulacia_thread_data.mapa = &mapa;
@@ -385,8 +378,20 @@ int main() {
     pthread_create(&thread_menu, NULL, menu, &menu_thread_data);
     pthread_create(&thread_simulacia, NULL, simulacia, &simulacia_thread_data);
 
-    //========Logika cast========
-
+    /*========Logika cast========
+    mapa_vykresli(mapa);
+    for (int i = 0; i < 5; ++i) {
+        int zapal2 = rand() % 10;
+        int zapal1 = rand() % 6;
+        if (mapa.mapa[zapal1][zapal2].horlavy) {
+            mapa_rozsir_ohen(&mapa, zapal1, zapal2, 0);
+            printf("Zapalene policko: [%d, %d]\n", zapal1, zapal2);
+        }
+    }
+    mapa_vykresli(mapa);
+    simulacia(&simulacia_thread_data);
+    mapa_vykresli(mapa);
+    */
 
     //=========Destroy casti==========
     pthread_join(thread_simulacia, NULL);
