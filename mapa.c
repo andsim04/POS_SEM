@@ -54,7 +54,7 @@ void mapa_init(MAPA* mapa, int sirka, int vyska, VIETOR * vietor) {
 }
 
 void mapa_vykresli(MAPA mapa) {
-    printf("\n   ");
+    printf("\n");
 
     for (int i = 0; i < mapa.sirka; ++i) {
         if ((i + 1) == mapa.sirka) {
@@ -306,7 +306,7 @@ void ulozenie_mapy(MAPA mapa, char* nazovSuboru) {
         perror("Problém s otvorením súboru!\n");
         return;
     }
-    // TODO: este nejako aby vypisalo konkretnu mapu, dat tam asi cislo  a podla nej ?
+
     for (int i = 0; i < mapa.vyska; ++i) {
         for (int j = 0; j < mapa.sirka; ++j) {
             fprintf(f, "%c", mapa.mapa[i][j].biotop);

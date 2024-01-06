@@ -7,7 +7,6 @@
 
 void *simulacia(void *thr_data) {
     SIMULACIA_THREAD_DATA *data = (SIMULACIA_THREAD_DATA *) thr_data;
-    //TODO resetovat kolocount po pridani novej mapy
     int kolocount = 0;
     while (*data->ukonci) {
         kolocount++;
@@ -105,7 +104,7 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
         printf("\tX: Ukonči program\n");
     }
     while (akcia != 'Z' && akcia != 'L' && akcia != 'C' && akcia != 'X') {
-        scanf("%c", &akcia);
+        scanf(" %c", &akcia);
     }
     switch (akcia) {
         case 'Z':
@@ -113,7 +112,7 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
             printf("\t1: Vytvorit vlastnu mapu.\n");
             printf("\t2: Vygenerovat mapu.\n");
             while (akcia != '1' && akcia != '2') {
-                scanf("%c", &akcia);
+                scanf(" %c", &akcia);
             }
             if (akcia == '1') {
                 mapa_rucne(data->mapa);
@@ -169,7 +168,7 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
     }
 }
 
-void zapal_bunky(void* thr_data) { //TODO zaseklo sa  tak to treba opravit
+void zapal_bunky(void* thr_data) {
     MENU_THREAD_DATA*data = (MENU_THREAD_DATA *) thr_data;
     int riadok = 0;
     int stlpec = 0;
@@ -179,7 +178,7 @@ void zapal_bunky(void* thr_data) { //TODO zaseklo sa  tak to treba opravit
         scanf("%d", &riadok);
         printf("Zadajte stlpec: \n");
         scanf("%d", &stlpec);
-        if ((riadok > 0 && riadok <= data->mapa->vyska) && (stlpec > 0 && stlpec <= data->mapa->sirka)) {
+        if ((riadok >= 0 && riadok < data->mapa->vyska) && (stlpec >= 0 && stlpec < data->mapa->sirka)) {
             if(data->mapa->mapa[riadok][stlpec].horlavy) {
                 data->mapa->mapa[riadok][stlpec].biotop = 'O';
                 data->mapa->mapa[riadok][stlpec].ohen = true;
@@ -212,7 +211,6 @@ void zapal_bunky(void* thr_data) { //TODO zaseklo sa  tak to treba opravit
 
 void *menu(void *thr_data) {
     MENU_THREAD_DATA*data = (MENU_THREAD_DATA *) thr_data;
-    bool menu_prerusenie = false;
     while (*data->ukonci) {
         char akcia = ' ';
 
@@ -225,18 +223,20 @@ void *menu(void *thr_data) {
             }
         }
         pthread_mutex_unlock(data->mapa_mutex);
-        if (!menu_prerusenie) {
+        if (!*data->menu_prerusenie) {
+
             while (akcia != 'H') {
                 scanf(" %c", &akcia);
             }
+            printf("Simulácia bola pozastavená.\n");
         }
-        if (!menu_prerusenie) {
+        if (!*data->menu_prerusenie) {
             pthread_mutex_lock(data->mapa_mutex);
             *data->je_pozastavena = true;
             pthread_cond_wait(data->pozastavena, data->mapa_mutex);
             pthread_mutex_unlock(data->mapa_mutex);
         } else {
-            menu_prerusenie = false;
+            *data->menu_prerusenie = false;
         }
 
         printf("\tZadaj akciu:\n");
@@ -261,8 +261,8 @@ void *menu(void *thr_data) {
             case 'Z':
                 zapal_bunky(data);
                 *data->je_pozastavena = true;
-                menu_prerusenie = true;
-
+                *data->menu_prerusenie = true;
+                pthread_mutex_unlock(data->mapa_mutex);
                 break;
             case 'N':
                 zaciatocne_menu('Z', data);
@@ -323,13 +323,13 @@ void *menu(void *thr_data) {
 
                 ulozenie_mapy(*data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
                 pthread_mutex_unlock(data->mapa_mutex);
-                menu_prerusenie = true;
+                *data->menu_prerusenie = true;
                 break;
             case 'L':
                 *data->je_pozastavena = true;
                 *data->nova_mapa = true;
                 nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt" );
-                menu_prerusenie = true;
+                *data->menu_prerusenie = true;
                 pthread_mutex_unlock(data->mapa_mutex);
                 break;
             case 'C':
@@ -366,7 +366,7 @@ void *menu(void *thr_data) {
 int main() {
     srand(time(NULL));
     //==========deklar cast=======
-    int PORT = 99888;
+    int PORT = 99887;
     int clientSocket;
     struct sockaddr_in serverAddr;
 
@@ -433,6 +433,7 @@ int main() {
     menu_thread_data.pozastavena = &pozastavena;
     menu_thread_data.ukonci = &ukonci;
     menu_thread_data.nova_mapa = &nova_mapa;
+    menu_thread_data.menu_prerusenie = &menu_prerusenie;
 
     simulacia_thread_data.je_pozastavena = &je_pozastavena;
     simulacia_thread_data.mapa = &mapa;
