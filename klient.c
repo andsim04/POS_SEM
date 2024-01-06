@@ -12,13 +12,13 @@ void *simulacia(void *thr_data) {
     while (*data->ukonci) {
         kolocount++;
         pthread_mutex_lock(data->mapa_mutex);
-        if (*data->nova_mapa) {
-            kolocount = 1;
-            *data->nova_mapa = false;
-        }
         while (*data->je_pozastavena) {
             pthread_cond_signal(data->pozastavena);
             pthread_cond_wait(data->bezi, data->mapa_mutex);
+        }
+        if (*data->nova_mapa) {
+            kolocount = 1;
+            *data->nova_mapa = false;
         }
         if (!*data->ukonci) {
             break;
@@ -239,7 +239,7 @@ void *menu(void *thr_data) {
         printf("\t\tC: Pripojit sa na server\n");
         printf("\t\tX: Ukonči program\n");
 
-        while (akcia != 'P' && akcia != 'Z' && akcia != 'N' && akcia != 'X' && akcia != 'U' && akcia != 'L' && akcia != 'C' && akcia != 'X') {
+        while (akcia != 'P' && akcia != 'Z' && akcia != 'N' && akcia != 'U' && akcia != 'L' && akcia != 'C' && akcia != 'X') {
             scanf("%c", &akcia);
         }
         pthread_mutex_lock(data->mapa_mutex);
@@ -292,11 +292,9 @@ void *menu(void *thr_data) {
 int main() {
     srand(time(NULL));
     //==========deklar cast=======
-    int PORT = 99887;
-    int BUFFER_SIZE = 1024;
+    int PORT = 99888;
     int clientSocket;
     struct sockaddr_in serverAddr;
-    char buffer[BUFFER_SIZE];
 
     pthread_t thread_menu, thread_simulacia;
     MAPA mapa;
@@ -308,7 +306,7 @@ int main() {
     pthread_mutex_t mapa_mutex;
     pthread_cond_t bezi;
     pthread_cond_t pozastavena;
-    bool je_pozastavena = false;
+    bool je_pozastavena = true;
     bool ukonci = true;
     bool zaciatok = true;
     bool nova_mapa = true;

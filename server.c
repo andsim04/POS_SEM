@@ -13,14 +13,19 @@
 void vykonaj_prikaz(char* prikaz, bool* server_zapnuty) {
     if (strcmp(prikaz, "Vypni") == 0) {
         *server_zapnuty = false;
+    } else if (strcmp(prikaz, "Uloz") == 0) {
+
+    } else if (strcmp(prikaz, "Nacitaj") == 0) {
+
     }
     printf("Server vykonal prikaz: %s\n", prikaz);
 }
 
 int main() {
-    int PORT = 99887;
+    int PORT = 99888;
     int BUFFER_SIZE = 1024;
 
+    bool je_pripojeny = false;
     bool server_zapnuty = true;
     int serverSocket, clientSocket;
     struct sockaddr_in serverAddr, clientAddr;
@@ -62,25 +67,33 @@ int main() {
     }
     printf("Server počúva na porte: %d\n", PORT);
 
-        //Prijatie pripojenia
-        //na accept() server ostane stáť a čaká kým sa nenaviaže spojenie s klientom,
-        //v momente ako sa naviaže spojenie server začne pokračovať.
-        //Ak sa naviazalo chybné spojenie alebo došlo k chybe tak sa socket uzavrie a program sa ukončí
-        clientSocket = accept(serverSocket, (struct sockaddr *) &clientAddr, &addrSize);
-        if (clientSocket == -1) {
-            perror("Chyba pri prijatí spojenia");
-            close(serverSocket);
-            exit(EXIT_FAILURE);
+    while (server_zapnuty) {
+
+        if(!je_pripojeny) {
+            //Prijatie pripojenia
+            //na accept() server ostane stáť a čaká kým sa nenaviaže spojenie s klientom,
+            //v momente ako sa naviaže spojenie server začne pokračovať.
+            //Ak sa naviazalo chybné spojenie alebo došlo k chybe tak sa socket uzavrie a program sa ukončí
+            clientSocket = accept(serverSocket, (struct sockaddr *) &clientAddr, &addrSize);
+            if (clientSocket == -1) {
+                perror("Chyba pri prijatí spojenia");
+                close(serverSocket);
+                exit(EXIT_FAILURE);
+            }
+            printf("Klienta sa napojil z adresy %s:%d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
+            je_pripojeny = true;
         }
 
-        printf("Klienta sa napojil z adresy %s:%d\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-
-    while (server_zapnuty) {
         //Prijímanie dát od klienta
         ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
         if (bytesRead == -1) {
             perror("Chyba pri prijímaní dát");
             close(clientSocket);
+            continue;
+        } else if (bytesRead == 0) {
+            printf("Klient sa odpojil!\n");
+            printf("Cakam na nového klienta.\n");
+            je_pripojeny = false;
             continue;
         }
         printf("Prijaté dáta od klienta: %s\n", buffer);
