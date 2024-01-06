@@ -53,7 +53,7 @@ void vykonaj_prikaz(int prikaz, bool* server_zapnuty, int clientSocket) {
             }
         }
         mapa_vykresli(mapa);
-v        ulozenie_mapy(mapa, "../UlozeneMapy/ServerMapy.txt");
+        ulozenie_mapy(mapa, "../UlozeneMapy/ServerMapy.txt");
 
         mapa_destroy(&mapa);
 
