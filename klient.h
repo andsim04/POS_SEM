@@ -47,6 +47,8 @@ void* simulacia(void* thr_data);
 void* menu(void* thr_data);
 int main();
 void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data);
+void prijmi_mapy_zo_servera(MENU_THREAD_DATA* data);
+void uloz_na_server(MENU_THREAD_DATA* data);
 void zapal_bunky(void* thr_data);
 
 #endif //POS_SEM_KLIENT_H

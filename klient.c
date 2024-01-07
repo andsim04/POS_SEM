@@ -94,8 +94,149 @@ void *simulacia(void *thr_data) {
 }
 
 
+void prijmi_mapy_zo_servera(MENU_THREAD_DATA *data) {
+    //pthread_mutex_lock(data->mapa_mutex);
+    if (data->je_pripojeny) {
+        int prikaz = 2;
+        int pocet_map = 0;
+        ssize_t prikaz_ = send(data->clientSocket, &prikaz, sizeof(int), 0);
+        if (prikaz_ == -1) {
+            perror("Error sending data");
+            close(data->clientSocket);
+            exit(EXIT_FAILURE);
+        }
 
-void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
+        ssize_t pocet_map_ = recv(data->clientSocket, &pocet_map, sizeof(int), 0);
+        if (pocet_map_ == -1) {
+            perror("Chyba pri prijímaní dát");
+            close(data->clientSocket);
+        }
+        MAPA mapy[pocet_map];
+        for (int i = 0; i < pocet_map; ++i) {
+            ssize_t sirka_ = recv(data->clientSocket, &mapy[i].sirka, sizeof(int), 0);
+            if (sirka_ == -1) {
+                perror("Error sending data");
+                close(data->clientSocket);
+                exit(EXIT_FAILURE);
+            }
+
+
+            ssize_t vyska_ = recv(data->clientSocket, &mapy[i].vyska, sizeof(int), 0);
+            if (vyska_ == -1) {
+                perror("Error sending data");
+                close(data->clientSocket);
+                exit(EXIT_FAILURE);
+            }
+
+            mapa_init2(&mapy[i], mapy[i].sirka, mapy[i].vyska, NULL);
+
+
+            char receivedMapa[mapy[i].vyska * mapy[i].sirka * sizeof(BUNKA)];
+            ssize_t mapa_ = recv(data->clientSocket, receivedMapa, sizeof(receivedMapa), 0);
+            if (mapa_ == -1) {
+                perror("Error receiving data");
+                close(data->clientSocket);
+                exit(EXIT_FAILURE);
+            }
+
+            // Deserializácia dát buniek
+            int l = 0;
+            for (int j = 0; j < mapy[i].vyska; ++j) {
+                for (int k = 0; k < mapy[i].sirka; ++k) {
+                    memcpy(&mapy[i].mapa[j][k], &receivedMapa[l], sizeof(BUNKA));
+                    l += sizeof(BUNKA);
+                }
+            }
+        }
+
+        for (int vypis = 0; vypis < pocet_map; ++vypis) {
+            printf("===Cislo mapy %d \n", vypis + 1);
+            mapa_vykresli(mapy[vypis]);
+        }
+        int vyber_mapa = 0;
+        printf("Vyberte mapu, ktorú chcete nacitat: \n");
+        scanf("%d", &vyber_mapa);
+
+        if (vyber_mapa > 0 && vyber_mapa <= pocet_map) {
+            if (mapy[vyber_mapa].je_inicializovana) {
+                mapa_destroy(data->mapa);
+            }
+            mapa_init2(data->mapa, mapy[vyber_mapa - 1].sirka, mapy[vyber_mapa - 1].vyska, NULL);
+            *data->mapa = mapy[vyber_mapa - 1];
+            data->mapa->je_inicializovana = true;
+        }
+
+        for (int uvolni = 0; uvolni < pocet_map; ++uvolni) {
+            if (uvolni == vyber_mapa - 1) {
+                continue;
+            } else {
+                mapa_destroy(&mapy[uvolni]);
+            }
+        }
+    } else {
+        printf("Nie ste pripojený k serveru!\n");
+    }
+
+}
+
+void uloz_na_server(MENU_THREAD_DATA *data) {
+    if (data->je_pripojeny) {
+        int prikaz = 1;
+        ssize_t prikaz_ = send(data->clientSocket, &prikaz, sizeof(int), 0);
+        if (prikaz_ == -1) {
+            perror("Error sending data");
+            close(data->clientSocket);
+            exit(EXIT_FAILURE);
+        }
+
+        ssize_t sirka_ = send(data->clientSocket, &data->mapa->sirka, sizeof(int), 0);
+        if (sirka_ == -1) {
+            perror("Error sending data");
+            close(data->clientSocket);
+            exit(EXIT_FAILURE);
+        }
+
+        ssize_t vyska_ = send(data->clientSocket, &data->mapa->vyska, sizeof(int), 0);
+        if (vyska_ == -1) {
+            perror("Error sending data");
+            close(data->clientSocket);
+            exit(EXIT_FAILURE);
+        }
+
+        BUNKA mapa[data->mapa->vyska][data->mapa->sirka];
+
+        for (int i = 0; i < data->mapa->vyska; ++i) {
+            for (int j = 0; j < data->mapa->sirka; ++j) {
+                mapa[i][j] = data->mapa->mapa[i][j];
+            }
+        }
+
+        // Serializacia dát buniek
+        char serializedMapa[data->mapa->vyska * data->mapa->sirka * sizeof(BUNKA)];
+        int k = 0;
+
+        for (int i = 0; i < data->mapa->vyska; ++i) {
+            for (int j = 0; j < data->mapa->sirka; ++j) {
+                memcpy(&serializedMapa[k], &data->mapa->mapa[i][j], sizeof(BUNKA));
+                k += sizeof(BUNKA);
+            }
+        }
+
+        // Send the serialized data
+        ssize_t mapa_ = send(data->clientSocket, serializedMapa, sizeof(serializedMapa), 0);
+        if (mapa_ == -1) {
+            perror("Error sending data");
+            close(data->clientSocket);
+            exit(EXIT_FAILURE);
+        }
+
+
+    } else {
+        printf("Neexistuje pripojenie na server\n");
+    }
+}
+
+void zaciatocne_menu(char akcia, MENU_THREAD_DATA *data) {
 
     if (akcia == ' ') {
         printf("Zadaj akciu:\n");
@@ -127,129 +268,65 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
                 int vyska;
                 scanf("%d", &vyska);
                 mapa_init(data->mapa, sirka, vyska, data->vietor);
-                mapa_vykresli(*data->mapa);
+                //mapa_vykresli(*data->mapa);
             }
             *data->je_pozastavena = false;
             *data->nova_mapa = true;
             pthread_mutex_unlock(data->mapa_mutex);
             pthread_cond_signal(data->bezi);
-
             break;
         case 'L':
-
             printf("Chcete načítať mapu z lokálneho súboru alebo serveru ? J/S\n");
             while (akcia != 'J' && akcia != 'S') {
                 scanf(" %c", &akcia);
             }
             if (akcia == 'J') {
-                *data->je_pozastavena = true;
+                *data->je_pozastavena = false;
                 *data->nova_mapa = true;
                 nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
+                pthread_cond_signal(data->bezi);
                 pthread_mutex_unlock(data->mapa_mutex);
             } else {
-                // TODO ide to ale sirku aj vysku nejako dogabalo
-                //pthread_mutex_lock(data->mapa_mutex);
-                if (data->je_pripojeny) {
-                    int prikaz = 2;
-                    int pocet_map = 0;
-                    ssize_t prikaz_ = send(data->clientSocket, &prikaz, sizeof(int), 0);
-                    if (prikaz_ == -1) {
-                        perror("Error sending data");
-                        close(data->clientSocket);
-                        exit(EXIT_FAILURE);
-                    }
-
-                    ssize_t pocet_map_ = recv(data->clientSocket, &pocet_map, sizeof(int), 0);
-                    if (pocet_map_ == -1) {
-                        perror("Chyba pri prijímaní dát");
-                        close(data->clientSocket);
-                    }
-                    MAPA mapy[pocet_map];
-                    for (int i = 0; i < pocet_map; ++i) {
-                        ssize_t sirka_ = recv(data->clientSocket, &mapy[i].sirka, sizeof(int), 0);
-                        if (sirka_ == -1) {
-                            perror("Error sending data");
-                            close(data->clientSocket);
-                            exit(EXIT_FAILURE);
-                        }
-
-
-                        ssize_t vyska_ = recv(data->clientSocket, &mapy[i].vyska, sizeof(int), 0);
-                        if (vyska_ == -1) {
-                            perror("Error sending data");
-                            close(data->clientSocket);
-                            exit(EXIT_FAILURE);
-                        }
-
-                        mapa_init2(&mapy[i],mapy[i].sirka, mapy[i].vyska, NULL);
-
-
-                        char receivedMapa[mapy[i].vyska * mapy[i].sirka * sizeof(BUNKA)];
-                        ssize_t mapa_ = recv(data->clientSocket, receivedMapa, sizeof(receivedMapa), 0);
-                        if (mapa_ == -1) {
-                            perror("Error receiving data");
-                            close(data->clientSocket);
-                            exit(EXIT_FAILURE);
-                        }
-
-                        // Deserializácia dát buniek
-                        int l = 0;
-                        for (int j = 0; j < mapy[i].vyska; ++j) {
-                            for (int k = 0; k < mapy[i].sirka; ++k) {
-                                memcpy(&mapy[i].mapa[j][k], &receivedMapa[l], sizeof(BUNKA));
-                                l += sizeof(BUNKA);
-                            }
-                        }
-                    }
-                    if (data->mapa->je_inicializovana) {
-                        mapa_destroy(data->mapa);
-                    }
-                    mapa_init2(data->mapa, mapy[0].sirka, mapy[0].vyska, NULL);
-                    for (int i = 0; i < data->mapa->vyska; ++i) {
-                        for (int j = 0; j < data->mapa->sirka; ++j) {
-                            data->mapa->mapa[i][j] = mapy[0].mapa[i][j];
-                        }
-
-                    }
-                    *data->je_pozastavena = false;
-                    *data->nova_mapa = true;
-                    pthread_mutex_unlock(data->mapa_mutex);
-                    //pthread_cond_signal(data->bezi);
-                }
-
+                prijmi_mapy_zo_servera(data);
+                *data->je_pozastavena = false;
+                *data->nova_mapa = true;
+                *data->menu_prerusenie = false;
+                pthread_mutex_unlock(data->mapa_mutex);
+                break;
             }
-
-            break;
-        case 'C':
-            //TODO: spravit aby to nepadlo ked nie je zapnuty server
-            if (!*data->je_pripojeny) {
-                if (connect(data->clientSocket, (struct sockaddr *) data->serverAddr, sizeof(*data->serverAddr)) ==
-                    -1) {
-                    perror("Chyba pripojenia na server.\n");
-                    close(data->clientSocket);
-                    exit(EXIT_FAILURE);
-                } else {
-                    printf("Uspesne pripojenie na server!\n");
-                    *data->je_pripojeny = true;
-                }
-            } else printf("Klient uz je pripojeny na server!\n");
-            *data->je_pozastavena = true;
-            zaciatocne_menu(' ', data);
-            break;
-        case 'X':
-            *data->ukonci = false;
-            *data->je_pozastavena = false;
-            pthread_mutex_unlock(data->mapa_mutex);
-            pthread_cond_signal(data->bezi);
-            break;
-        default:
-            printf("Zadany zlý parameter!\n");
-            break;
+                case 'C':
+                    //TODO: spravit aby to nepadlo ked nie je zapnuty server
+                    if (!*data->je_pripojeny) {
+                        if (connect(data->clientSocket, (struct sockaddr *) data->serverAddr,
+                                    sizeof(*data->serverAddr)) ==
+                            -1) {
+                            perror("Chyba pripojenia na server.\n");
+                            close(data->clientSocket);
+                            exit(EXIT_FAILURE);
+                        } else {
+                            printf("Uspesne pripojenie na server!\n");
+                            *data->je_pripojeny = true;
+                        }
+                    } else printf("Klient uz je pripojeny na server!\n");
+                *data->je_pozastavena = true;
+                zaciatocne_menu(' ', data);
+                break;
+                case 'X':
+                    *data->ukonci = false;
+                *data->je_pozastavena = false;
+                pthread_mutex_unlock(data->mapa_mutex);
+                pthread_cond_signal(data->bezi);
+                break;
+                default:
+                    printf("Zadany zlý parameter!\n");
+                break;
+            }
     }
-}
 
-void zapal_bunky(void* thr_data) {
-    MENU_THREAD_DATA*data = (MENU_THREAD_DATA *) thr_data;
+
+
+void zapal_bunky(void *thr_data) {
+    MENU_THREAD_DATA *data = (MENU_THREAD_DATA *) thr_data;
     int riadok = 0;
     int stlpec = 0;
     bool hotovo = false;
@@ -259,7 +336,7 @@ void zapal_bunky(void* thr_data) {
         printf("Zadajte stlpec: \n");
         scanf("%d", &stlpec);
         if ((riadok >= 0 && riadok < data->mapa->vyska) && (stlpec >= 0 && stlpec < data->mapa->sirka)) {
-            if(data->mapa->mapa[riadok][stlpec].horlavy) {
+            if (data->mapa->mapa[riadok][stlpec].horlavy) {
                 data->mapa->mapa[riadok][stlpec].biotop = 'O';
                 data->mapa->mapa[riadok][stlpec].ohen = true;
                 data->mapa->mapa[riadok][stlpec].horlavy = false;
@@ -290,7 +367,7 @@ void zapal_bunky(void* thr_data) {
 }
 
 void *menu(void *thr_data) {
-    MENU_THREAD_DATA*data = (MENU_THREAD_DATA *) thr_data;
+    MENU_THREAD_DATA *data = (MENU_THREAD_DATA *) thr_data;
     while (*data->ukonci) {
         char akcia = ' ';
 
@@ -304,7 +381,7 @@ void *menu(void *thr_data) {
         }
         pthread_mutex_unlock(data->mapa_mutex);
         if (!*data->menu_prerusenie) {
-
+            pthread_cond_signal(data->bezi);
             while (akcia != 'H') {
                 scanf(" %c", &akcia);
             }
@@ -328,7 +405,8 @@ void *menu(void *thr_data) {
         printf("\t\tC: Pripojit sa na server\n");
         printf("\t\tX: Ukonči program\n");
 
-        while (akcia != 'P' && akcia != 'Z' && akcia != 'N' && akcia != 'U' && akcia != 'L' && akcia != 'C' && akcia != 'X') {
+        while (akcia != 'P' && akcia != 'Z' && akcia != 'N' && akcia != 'U' && akcia != 'L' && akcia != 'C' &&
+               akcia != 'X') {
             scanf("%c", &akcia);
         }
         pthread_mutex_lock(data->mapa_mutex);
@@ -349,99 +427,69 @@ void *menu(void *thr_data) {
                 *data->nova_mapa = true;
                 break;
             case 'U':
-                if (data->je_pripojeny) {
-                    int prikaz = 1;
-                    ssize_t prikaz_ = send(data->clientSocket, &prikaz, sizeof(int), 0);
-                    if (prikaz_ == -1) {
-                        perror("Error sending data");
-                        close(data->clientSocket);
-                        exit(EXIT_FAILURE);
+                printf("Chcete uložiť na server alebo lokálne S/L\n");
+                while (akcia != 'S' && akcia != 'L') {
+                    scanf(" %c", &akcia);
+                }
+                if (akcia == 'S') {
+                    uloz_na_server(data);
+                } else {
+                    ulozenie_mapy(*data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
+                    pthread_mutex_unlock(data->mapa_mutex);
+                    *data->menu_prerusenie = true;
+                    break;
+                    case 'L':
+                        printf("Chcete načítať mapu z lokálneho súboru alebo serveru ? J/S\n");
+                    while (akcia != 'J' && akcia != 'S') {
+                        scanf(" %c", &akcia);
                     }
-
-                    ssize_t sirka_ = send(data->clientSocket, &data->mapa->sirka, sizeof(int), 0);
-                    if (sirka_ == -1) {
-                        perror("Error sending data");
-                        close(data->clientSocket);
-                        exit(EXIT_FAILURE);
-                    }
-
-                    ssize_t vyska_ = send(data->clientSocket, &data->mapa->vyska, sizeof(int), 0);
-                    if (vyska_ == -1) {
-                        perror("Error sending data");
-                        close(data->clientSocket);
-                        exit(EXIT_FAILURE);
-                    }
-
-                    BUNKA mapa[data->mapa->vyska][data->mapa->sirka];
-
-                    for (int i = 0; i < data->mapa->vyska; ++i) {
-                        for (int j = 0; j < data->mapa->sirka; ++j) {
-                            mapa[i][j] = data->mapa->mapa[i][j];
-                        }
-                    }
-
-                    // Serializacia dát buniek
-                    char serializedMapa[data->mapa->vyska * data->mapa->sirka * sizeof(BUNKA)];
-                    int k = 0;
-
-                    for (int i = 0; i < data->mapa->vyska; ++i) {
-                        for (int j = 0; j < data->mapa->sirka; ++j) {
-                            memcpy(&serializedMapa[k], &data->mapa->mapa[i][j], sizeof(BUNKA));
-                            k += sizeof(BUNKA);
-                        }
-                    }
-
-                    // Send the serialized data
-                    ssize_t mapa_ = send(data->clientSocket, serializedMapa, sizeof(serializedMapa), 0);
-                    if (mapa_ == -1) {
-                        perror("Error sending data");
-                        close(data->clientSocket);
-                        exit(EXIT_FAILURE);
-                    }
-
-                } else printf("Neexistuje pripojenie na server\n");
-
-                ulozenie_mapy(*data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
-                pthread_mutex_unlock(data->mapa_mutex);
-                *data->menu_prerusenie = true;
-                break;
-            case 'L':
-                *data->je_pozastavena = true;
-                *data->nova_mapa = true;
-                nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt" );
-                *data->menu_prerusenie = true;
-                pthread_mutex_unlock(data->mapa_mutex);
-                break;
-            case 'C':
-                //TODO: spravit aby to nepadlo ked nie je zapnuty server
-                if (!*data->je_pripojeny) {
-                    if (connect(data->clientSocket, (struct sockaddr *) data->serverAddr, sizeof(*data->serverAddr)) ==
-                        -1) {
-                        perror("Chyba pripojenia na server.\n");
-                        close(data->clientSocket);
-                        exit(EXIT_FAILURE);
+                    if (akcia == 'J') {
+                        *data->je_pozastavena = false;
+                        *data->nova_mapa = true;
+                        nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
+                        pthread_mutex_unlock(data->mapa_mutex);
                     } else {
-                        printf("Uspesne pripojenie na server!\n");
-                        *data->je_pripojeny = true;
+                        prijmi_mapy_zo_servera(data);
+                        *data->je_pozastavena = false;
+                        *data->nova_mapa = true;
+                        *data->menu_prerusenie = false;
+                        pthread_mutex_unlock(data->mapa_mutex);
+                        break;
+
+                        case 'C':
+                            //TODO: spravit aby to nepadlo ked nie je zapnuty server
+                            if (!*data->je_pripojeny) {
+                                if (connect(data->clientSocket, (struct sockaddr *) data->serverAddr,
+                                            sizeof(*data->serverAddr)) ==
+                                    -1) {
+                                    perror("Chyba pripojenia na server.\n");
+                                    close(data->clientSocket);
+                                    exit(EXIT_FAILURE);
+                                } else {
+                                    printf("Uspesne pripojenie na server!\n");
+                                    *data->je_pripojeny = true;
+                                }
+                            } else printf("Klient uz je pripojeny na server!\n");
+                        *data->je_pozastavena = true;
+                        *data->menu_prerusenie = true;
+                        pthread_mutex_unlock(data->mapa_mutex);
+                        break;
+                        case 'X':
+                            *data->ukonci = false;
+                        *data->je_pozastavena = false;
+                        pthread_mutex_unlock(data->mapa_mutex);
+                        pthread_cond_signal(data->bezi);
+                        break;
+                        default:
+                            printf("Zadany zlý parameter!\n");
+                        break;
                     }
-                } else printf("Klient uz je pripojeny na server!\n");
-                *data->je_pozastavena = true;
-                *data->menu_prerusenie = true;
-                pthread_mutex_unlock(data->mapa_mutex);
-                break;
-            case 'X':
-                *data->ukonci = false;
-                *data->je_pozastavena = false;
-                pthread_mutex_unlock(data->mapa_mutex);
-                pthread_cond_signal(data->bezi);
-                break;
-            default:
-                printf("Zadany zlý parameter!\n");
-                break;
+                }
         }
+        pthread_mutex_unlock(data->mapa_mutex);
     }
-    pthread_mutex_unlock(data->mapa_mutex);
 }
+
 
 int main() {
     srand(time(NULL));

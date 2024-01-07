@@ -55,7 +55,7 @@ void mapa_init(MAPA* mapa, int sirka, int vyska, VIETOR * vietor) {
 }
 
 void mapa_vykresli(MAPA mapa) {
-    printf("\n");
+    printf("\n   ");
 
     for (int i = 0; i < mapa.sirka; ++i) {
         if ((i + 1) == mapa.sirka) {
@@ -94,6 +94,7 @@ void mapa_destroy(MAPA* mapa) {
 
     mapa->sirka = 0;
     mapa->vyska = 0;
+    mapa->je_inicializovana = false;
 
 }
 

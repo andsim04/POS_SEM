@@ -171,8 +171,12 @@ void vykonaj_prikaz(int prikaz, bool* server_zapnuty, int clientSocket) {
                 close(clientSocket);
                 exit(EXIT_FAILURE);
             }
+            nacitane_mapy[cislo_mapy].je_inicializovana = true;
             cislo_mapy++;
 
+        }
+        for (int i = 0; i < pocet_map; ++i) {
+            mapa_destroy(&nacitane_mapy[i]);
         }
 
     }
