@@ -53,18 +53,134 @@ void vykonaj_prikaz(int prikaz, bool* server_zapnuty, int clientSocket) {
             }
         }
         mapa_vykresli(mapa);
-v        ulozenie_mapy(mapa, "../UlozeneMapy/ServerMapy.txt");
+        ulozenie_mapy(mapa, "../UlozeneMapy/ServerMapy.txt");
 
         mapa_destroy(&mapa);
 
-    } else if (prikaz == 2) {
+    } else if (prikaz == 2) { //nacitanie mozno by to slo ze iba chary sa nacitaju a spracuju v klientovi nemusela by sa robit serializacia a bolo by to mensie
+        MAPA nacitane_mapy[20];
+        int pocet_map = 0;
+        int cislo_mapy = 0;
+        FILE *f = fopen("../UlozeneMapy/ServerMapy.txt", "r");
+        char znak = ' ';
+        int sirka = 0;
+        int vyska = 0;
+        const unsigned int odpad = 1;
+        char prazdnyRiadok[odpad];
+        int sirka_mapy = 0;
+        int vyska_mapy = 0;
+        BUNKA bunky[10][10];
+        while (!feof(f)) {
+            znak = (char) fgetc(f);
+            if (znak == 'P' || znak == 'F' || znak == 'M' || znak == 'W') {
+                bunky[vyska][sirka].biotop = znak;
+                bunky[vyska][sirka].zhorena = false;
+                bunky[vyska][sirka].ohen = false;
+                bunky[vyska][sirka].x = vyska;
+                bunky[vyska][sirka].y = sirka;
+                if (znak == 'F' || znak == 'P') {
+                    bunky[vyska][sirka].horlavy = true;
+                } else {
+                    bunky[vyska][sirka].horlavy = false;
+                }
+                sirka++;
+
+            } else if (znak == '\n'  && sirka != 0) {
+                fgets(prazdnyRiadok, odpad, f);
+                vyska++;
+
+                if (pocet_map == cislo_mapy) {
+                    sirka_mapy = sirka;
+                    cislo_mapy++;
+                }
+                sirka = 0;
+            } else if (znak == '\n'  && sirka == 0 && pocet_map != cislo_mapy) {
+                vyska_mapy = vyska;
+                mapa_init(&nacitane_mapy[pocet_map], sirka_mapy, vyska_mapy, NULL);
+                for (int i = 0; i < vyska_mapy; i++) {
+                    for (int j = 0; j < sirka_mapy; ++j) {
+                        nacitane_mapy[pocet_map].mapa[i][j].biotop = bunky[i][j].biotop;
+                        nacitane_mapy[pocet_map].mapa[i][j].horlavy = bunky[i][j].horlavy;
+                        nacitane_mapy[pocet_map].mapa[i][j].ohen = bunky[i][j].ohen;
+                        nacitane_mapy[pocet_map].mapa[i][j].zhorena = bunky[i][j].zhorena;
+                        nacitane_mapy[pocet_map].mapa[i][j].x = bunky[i][j].x;
+                        nacitane_mapy[pocet_map].mapa[i][j].y = bunky[i][j].y;
+                    }
+                }
+                nacitane_mapy[pocet_map].sirka = sirka_mapy;
+                nacitane_mapy[pocet_map].vyska = vyska_mapy;
+                nacitane_mapy[pocet_map].vietor = NULL;
+                vyska = 0;
+                sirka = 0;
+                vyska_mapy = 0;
+                sirka_mapy = 0;
+                pocet_map++;
+                fgets(prazdnyRiadok, odpad, f);
+            } else {
+                fgets(prazdnyRiadok, odpad, f);
+            }
+        }
+        fclose(f);
+
+        ssize_t pocet_map_ = send(clientSocket, &pocet_map, sizeof(int), 0);
+        if (pocet_map_== -1) {
+            perror("Error sending data");
+            close(clientSocket);
+            exit(EXIT_FAILURE);
+        }
+        cislo_mapy = 0;
+        while (pocet_map > cislo_mapy) {
+
+            ssize_t sirka_ = send(clientSocket, &nacitane_mapy[cislo_mapy].sirka, sizeof(int), 0);
+            if (sirka_ == -1) {
+                perror("Error sending data");
+                close(clientSocket);
+                exit(EXIT_FAILURE);
+            }
+
+            ssize_t vyska_ = send(clientSocket, &nacitane_mapy[cislo_mapy].vyska, sizeof(int), 0);
+            if (vyska_ == -1) {
+                perror("Error sending data");
+                close(clientSocket);
+                exit(EXIT_FAILURE);
+            }
+
+            BUNKA mapa[nacitane_mapy[cislo_mapy].vyska][nacitane_mapy[cislo_mapy].sirka];
+
+            for (int i = 0; i < nacitane_mapy[cislo_mapy].vyska; ++i) {
+                for (int j = 0; j < nacitane_mapy[cislo_mapy].sirka; ++j) {
+                    mapa[i][j] = nacitane_mapy[cislo_mapy].mapa[i][j];
+                }
+            }
+
+            // Serializacia dát buniek
+            char serializedMapa[nacitane_mapy[cislo_mapy].vyska * nacitane_mapy[cislo_mapy].sirka * sizeof(BUNKA)];
+            int l = 0;
+
+            for (int j = 0; j < nacitane_mapy[cislo_mapy].vyska; ++j) {
+                for (int k = 0; k < nacitane_mapy[cislo_mapy].sirka; ++k) {
+                    memcpy(&serializedMapa[l], &nacitane_mapy[cislo_mapy].mapa[j][k], sizeof(BUNKA));
+                    l += sizeof(BUNKA);
+                }
+            }
+
+            // Send the serialized data
+            ssize_t mapa_ = send(clientSocket, serializedMapa, sizeof(serializedMapa), 0);
+            if (mapa_ == -1) {
+                perror("Error sending data");
+                close(clientSocket);
+                exit(EXIT_FAILURE);
+            }
+            cislo_mapy++;
+
+        }
 
     }
     printf("Server vykonal prikaz: %d\n", prikaz);
 }
 
 int main() {
-    int PORT = 99887;
+    int PORT = 99883;
     int BUFFER_SIZE = 1024;
 
     bool je_pripojeny = false;

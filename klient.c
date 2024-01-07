@@ -96,6 +96,7 @@ void *simulacia(void *thr_data) {
 
 
 void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
+
     if (akcia == ' ') {
         printf("Zadaj akciu:\n");
         printf("\tZ: Začni simulaciu\n");
@@ -118,7 +119,7 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
                 mapa_rucne(data->mapa);
                 mapa_vykresli(*data->mapa);
             } else {
-                printf("Zadajte rozmery mapy:\n");
+                printf("Zadajte rozmery mapy:\n"); //TODO opravit vstupy
                 printf("\tSirka:\n");
                 int sirka;
                 scanf("%d", &sirka);
@@ -135,10 +136,89 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA* data) {
 
             break;
         case 'L':
-            *data->je_pozastavena = true;
-            *data->nova_mapa = true;
-            nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt" );
-            pthread_mutex_unlock(data->mapa_mutex);
+
+            printf("Chcete načítať mapu z lokálneho súboru alebo serveru ? J/S\n");
+            while (akcia != 'J' && akcia != 'S') {
+                scanf(" %c", &akcia);
+            }
+            if (akcia == 'J') {
+                *data->je_pozastavena = true;
+                *data->nova_mapa = true;
+                nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
+                pthread_mutex_unlock(data->mapa_mutex);
+            } else {
+                // TODO ide to ale sirku aj vysku nejako dogabalo
+                //pthread_mutex_lock(data->mapa_mutex);
+                if (data->je_pripojeny) {
+                    int prikaz = 2;
+                    int pocet_map = 0;
+                    ssize_t prikaz_ = send(data->clientSocket, &prikaz, sizeof(int), 0);
+                    if (prikaz_ == -1) {
+                        perror("Error sending data");
+                        close(data->clientSocket);
+                        exit(EXIT_FAILURE);
+                    }
+
+                    ssize_t pocet_map_ = recv(data->clientSocket, &pocet_map, sizeof(int), 0);
+                    if (pocet_map_ == -1) {
+                        perror("Chyba pri prijímaní dát");
+                        close(data->clientSocket);
+                    }
+                    MAPA mapy[pocet_map];
+                    for (int i = 0; i < pocet_map; ++i) {
+                        ssize_t sirka_ = recv(data->clientSocket, &mapy[i].sirka, sizeof(int), 0);
+                        if (sirka_ == -1) {
+                            perror("Error sending data");
+                            close(data->clientSocket);
+                            exit(EXIT_FAILURE);
+                        }
+
+
+                        ssize_t vyska_ = recv(data->clientSocket, &mapy[i].vyska, sizeof(int), 0);
+                        if (vyska_ == -1) {
+                            perror("Error sending data");
+                            close(data->clientSocket);
+                            exit(EXIT_FAILURE);
+                        }
+
+                        mapa_init2(&mapy[i],mapy[i].sirka, mapy[i].vyska, NULL);
+
+
+                        char receivedMapa[mapy[i].vyska * mapy[i].sirka * sizeof(BUNKA)];
+                        ssize_t mapa_ = recv(data->clientSocket, receivedMapa, sizeof(receivedMapa), 0);
+                        if (mapa_ == -1) {
+                            perror("Error receiving data");
+                            close(data->clientSocket);
+                            exit(EXIT_FAILURE);
+                        }
+
+                        // Deserializácia dát buniek
+                        int l = 0;
+                        for (int j = 0; j < mapy[i].vyska; ++j) {
+                            for (int k = 0; k < mapy[i].sirka; ++k) {
+                                memcpy(&mapy[i].mapa[j][k], &receivedMapa[l], sizeof(BUNKA));
+                                l += sizeof(BUNKA);
+                            }
+                        }
+                    }
+                    if (data->mapa->je_inicializovana) {
+                        mapa_destroy(data->mapa);
+                    }
+                    mapa_init2(data->mapa, mapy[0].sirka, mapy[0].vyska, NULL);
+                    for (int i = 0; i < data->mapa->vyska; ++i) {
+                        for (int j = 0; j < data->mapa->sirka; ++j) {
+                            data->mapa->mapa[i][j] = mapy[0].mapa[i][j];
+                        }
+
+                    }
+                    *data->je_pozastavena = false;
+                    *data->nova_mapa = true;
+                    pthread_mutex_unlock(data->mapa_mutex);
+                    //pthread_cond_signal(data->bezi);
+                }
+
+            }
+
             break;
         case 'C':
             //TODO: spravit aby to nepadlo ked nie je zapnuty server
@@ -366,7 +446,7 @@ void *menu(void *thr_data) {
 int main() {
     srand(time(NULL));
     //==========deklar cast=======
-    int PORT = 99887;
+    int PORT = 99883;
     int clientSocket;
     struct sockaddr_in serverAddr;
 

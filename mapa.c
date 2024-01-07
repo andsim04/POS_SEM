@@ -14,6 +14,7 @@ void mapa_init2(MAPA* mapa, int sirka, int vyska, VIETOR* vietor) {
     for (int i = 0; i < vyska; i++) {
         mapa->mapa[i] = calloc(sirka, sizeof(BUNKA));
     }
+    mapa->je_inicializovana = true;
 }
 
 void mapa_init(MAPA* mapa, int sirka, int vyska, VIETOR * vietor) {
