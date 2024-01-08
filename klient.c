@@ -150,7 +150,7 @@ void prijmi_mapy_zo_servera(MENU_THREAD_DATA *data) {
         }
 
         for (int i = 0; i < pocet_map; ++i) {
-            printf("===Cislo mapy %d \n", i+ 1);
+            printf("=====Cislo mapy %d===== \n", i+ 1);
             mapa_vykresli(mapy[i]);
         }
         int vyber_mapa = 0;
@@ -290,7 +290,7 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA *data) {
             if (akcia == 'J') {
                 *data->je_pozastavena = false;
                 *data->nova_mapa = true;
-                nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
+                nacitanie_mapy(data->mapa, "./UlozeneMapy/UlozeneMapy.txt");
                 *data->menu_prerusenie = false;
                 pthread_mutex_unlock(data->mapa_mutex);
                 pthread_cond_signal(data->bezi);
@@ -439,12 +439,15 @@ void *menu(void *thr_data) {
                 }
                 if (akcia == 'S') {
                     uloz_na_server(data);
-                } else {
-                    ulozenie_mapy(*data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
                     pthread_mutex_unlock(data->mapa_mutex);
                     *data->menu_prerusenie = true;
-                    break;
+                } else {
+                    ulozenie_mapy(*data->mapa, "./UlozeneMapy/UlozeneMapy.txt");
+                    pthread_mutex_unlock(data->mapa_mutex);
+                    *data->menu_prerusenie = true;
+
                 }
+                break;
             case 'L':
                 printf("Chcete načítať mapu z lokálneho súboru alebo serveru ? J/S\n");
                 while (akcia != 'J' && akcia != 'S') {
@@ -453,7 +456,7 @@ void *menu(void *thr_data) {
                 if (akcia == 'J') {
                     *data->je_pozastavena = false;
                     *data->nova_mapa = true;
-                    nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
+                    nacitanie_mapy(data->mapa, "./UlozeneMapy/UlozeneMapy.txt");
                     *data->menu_prerusenie = false;
                     pthread_mutex_unlock(data->mapa_mutex);
 
@@ -464,6 +467,7 @@ void *menu(void *thr_data) {
                     *data->menu_prerusenie = false;
                     pthread_mutex_unlock(data->mapa_mutex);
                 }
+                break;
 
             case 'C':
 
@@ -502,13 +506,13 @@ void *menu(void *thr_data) {
 int main() {
     srand(time(NULL));
     //==========deklar cast=======
-    int PORT = 99883;
+    int PORT = 10123;
     int clientSocket;
-    struct sockaddr_in serverAddr;
+    struct sockaddr_in clientAddr;
 
     pthread_t thread_menu, thread_simulacia;
     MAPA mapa;
-    mapa.je_inicializovana = true;
+    mapa.je_inicializovana = false;
     VIETOR vietor;
 
     SIMULACIA_THREAD_DATA simulacia_thread_data;
@@ -533,24 +537,17 @@ int main() {
     }
 
     // Nastavenie IP adresy
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(PORT);
+    clientAddr.sin_family = AF_INET;
+    clientAddr.sin_port = htons(PORT);
     //inet_pton premeni stringový format IP adresy na binarny format
-    if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, "127.0.0.1", &clientAddr.sin_addr) <= 0) {
         perror("Error configuring server address");
         close(clientSocket);
         exit(EXIT_FAILURE);
     }
 
-    // Pripojenie na server
-    //if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) == -1) {
-    //    perror("Error connecting to server");
-    //    close(clientSocket);
-    //    exit(EXIT_FAILURE);
-    //}
-
     menu_thread_data.clientSocket = clientSocket;
-    menu_thread_data.serverAddr = &serverAddr;
+    menu_thread_data.serverAddr = &clientAddr;
 
     vietor.smer = 0;
     vietor.trvanie = 0;
@@ -598,13 +595,7 @@ int main() {
 
 
     ////Ukoncenie servera pomocou príkazu
-    //    ssize_t prikaz_vypnutia = send(clientSocket, "Vypni", strlen("Vypni"), 0);
-    //    if (prikaz_vypnutia == -1) {
-    //        perror("Error sending data");
-    //        close(clientSocket);
-    //        exit(EXIT_FAILURE);
-    //    }
-    //}
+
     close(clientSocket);
     return 0;
 

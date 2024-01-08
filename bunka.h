@@ -19,9 +19,7 @@ typedef struct bunka {
 
 void bunka_init(BUNKA* bunka, char biotop, _Bool horlavy, _Bool ohen, _Bool zhorena, int x, int y);
 void bunka_vykresli(BUNKA bunka);
-void bunka_podpal(BUNKA* bunka);
-void bunka_zmen(BUNKA* bunka, char biotop);
-void bunka_zhor(BUNKA* bunka);
+
 
 
 #endif //POS_SEM_BUNKA_H

@@ -16,18 +16,7 @@ void bunka_vykresli(BUNKA bunka) {
     printf("%c", bunka.biotop);
 }
 
-void bunka_podpal(BUNKA* bunka) {
-    bunka->ohen = true;
-}
 
-void bunka_zmen(BUNKA* bunka, char biotop) {
-    bunka->biotop = biotop;
-}
-
-void bunka_zhor(BUNKA* bunka) {
-    bunka->ohen = false;
-    bunka->zhorena = true;
-}
 
 
 

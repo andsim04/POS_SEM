@@ -53,7 +53,7 @@ void vykonaj_prikaz(int prikaz, bool* server_zapnuty, int clientSocket) {
             }
         }
         mapa_vykresli(mapa);
-        ulozenie_mapy(mapa, "../UlozeneMapy/ServerMapy.txt");
+        ulozenie_mapy(mapa, "./UlozeneMapy/ServerMapy.txt");
 
         mapa_destroy(&mapa);
 
@@ -61,7 +61,7 @@ void vykonaj_prikaz(int prikaz, bool* server_zapnuty, int clientSocket) {
         MAPA nacitane_mapy[20];
         int pocet_map = 0;
         int cislo_mapy = 0;
-        FILE *f = fopen("../UlozeneMapy/ServerMapy.txt", "r");
+        FILE *f = fopen("./UlozeneMapy/ServerMapy.txt", "r");
         char znak = ' ';
         int sirka = 0;
         int vyska = 0;
@@ -184,7 +184,7 @@ void vykonaj_prikaz(int prikaz, bool* server_zapnuty, int clientSocket) {
 }
 
 int main() {
-    int PORT = 99883;
+    int PORT = 10123;
     int BUFFER_SIZE = 1024;
 
     bool je_pripojeny = false;
@@ -220,9 +220,9 @@ int main() {
 
     // Čakanie na prichádzajúce pripojenie
     //listen() dáva vedieť operačnému systému, že nami vytvorený socket by mal prijímať prichádzajúce pripojenia
-    // parameter 5 udáva maximalny pocet v rade cakajúcich pripojení
+    // parameter 0 udáva maximalny pocet v rade cakajúcich pripojení (0 == default OS)
     //v pripade zlyhania sa socket uzavrie a program sa ukončí
-    if (listen(serverSocket, 5) == -1) {
+    if (listen(serverSocket, 0) == -1) {
         perror("Chyba pri čakaní na pripojenie");
         close(serverSocket);
         exit(EXIT_FAILURE);
