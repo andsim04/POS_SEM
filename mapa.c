@@ -95,6 +95,7 @@ void mapa_destroy(MAPA* mapa) {
     mapa->sirka = 0;
     mapa->vyska = 0;
     mapa->je_inicializovana = false;
+    mapa = NULL;
 
 }
 
@@ -322,7 +323,7 @@ void ulozenie_mapy(MAPA mapa, char* nazovSuboru) {
 }
 
 void nacitanie_mapy(MAPA* mapa, char* nazovSuboru) {
-    MAPA nacitane_mapy[20];
+    MAPA nacitane_mapy[100];
     int pocet_map = 0;
     int cislo_mapy = 0;
     FILE *f = fopen(nazovSuboru, "r");
@@ -333,7 +334,7 @@ void nacitanie_mapy(MAPA* mapa, char* nazovSuboru) {
     char prazdnyRiadok[odpad];
     int sirka_mapy = 0;
     int vyska_mapy = 0;
-    BUNKA bunky[10][10];
+    BUNKA bunky[50][50];
     while (!feof(f)) {
         znak = (char) fgetc(f);
         if (znak == 'P' || znak == 'F' || znak == 'M' || znak == 'W') {
@@ -390,7 +391,7 @@ void nacitanie_mapy(MAPA* mapa, char* nazovSuboru) {
         mapa_vykresli(nacitane_mapy[i]);
     }
     int vyber_mapa = 0;
-    //TODO opatrenia voci nespravnemu vstupu
+
     printf("Vyberte cislo mapy: \n");
     scanf("%d", &vyber_mapa);
     if (vyber_mapa > 0 && vyber_mapa <= pocet_map) {
@@ -398,7 +399,23 @@ void nacitanie_mapy(MAPA* mapa, char* nazovSuboru) {
             mapa_destroy(mapa);
         }
         mapa_init2(mapa, nacitane_mapy[vyber_mapa - 1].sirka, nacitane_mapy[vyber_mapa - 1].vyska, NULL);
-        *mapa = nacitane_mapy[vyber_mapa - 1];
+        for (int i = 0; i < mapa->vyska; ++i) {
+            for (int j = 0; j < mapa->sirka; ++j) {
+                mapa->mapa[i][j].biotop = nacitane_mapy[vyber_mapa - 1].mapa[i][j].biotop;
+                mapa->mapa[i][j].horlavy = nacitane_mapy[vyber_mapa - 1].mapa[i][j].horlavy;
+                mapa->mapa[i][j].ohen  = nacitane_mapy[vyber_mapa - 1].mapa[i][j].ohen;
+                mapa->mapa[i][j].zhorena = nacitane_mapy[vyber_mapa - 1].mapa[i][j].zhorena;
+                mapa->mapa[i][j].x = nacitane_mapy[vyber_mapa - 1].mapa[i][j].x;
+                mapa->mapa[i][j].y = nacitane_mapy[vyber_mapa - 1].mapa[i][j].y;
+
+            }
+        }
+
+        for (int i = 0; i < pocet_map; ++i) {
+            mapa_destroy(&nacitane_mapy[i]);
+        }
+    } else {
+        printf("Mapa s danym cislom neexistuje.\n");
     }
 
     printf("Mapa cislo %d bola nacitana!\n", vyber_mapa);

@@ -89,7 +89,7 @@ void *simulacia(void *thr_data) {
         //koniec krit sekcie
 
         printf("Pre pozastavenie simulácie zadajte 'H'\n");
-        sleep(5);
+        sleep(2);
     }
 }
 
@@ -149,29 +149,36 @@ void prijmi_mapy_zo_servera(MENU_THREAD_DATA *data) {
             }
         }
 
-        for (int vypis = 0; vypis < pocet_map; ++vypis) {
-            printf("===Cislo mapy %d \n", vypis + 1);
-            mapa_vykresli(mapy[vypis]);
+        for (int i = 0; i < pocet_map; ++i) {
+            printf("===Cislo mapy %d \n", i+ 1);
+            mapa_vykresli(mapy[i]);
         }
         int vyber_mapa = 0;
         printf("Vyberte mapu, ktorú chcete nacitat: \n");
         scanf("%d", &vyber_mapa);
 
         if (vyber_mapa > 0 && vyber_mapa <= pocet_map) {
-            if (mapy[vyber_mapa].je_inicializovana) {
+            if (data->mapa->je_inicializovana) {
                 mapa_destroy(data->mapa);
             }
             mapa_init2(data->mapa, mapy[vyber_mapa - 1].sirka, mapy[vyber_mapa - 1].vyska, NULL);
-            *data->mapa = mapy[vyber_mapa - 1];
-            data->mapa->je_inicializovana = true;
+            for (int i = 0; i < data->mapa->vyska; ++i) {
+                for (int j = 0; j < data->mapa->sirka; ++j) {
+                    data->mapa->mapa[i][j].biotop = mapy[vyber_mapa - 1].mapa[i][j].biotop;
+                    data->mapa->mapa[i][j].horlavy = mapy[vyber_mapa - 1].mapa[i][j].horlavy;
+                    data->mapa->mapa[i][j].ohen = mapy[vyber_mapa - 1].mapa[i][j].ohen;
+                    data->mapa->mapa[i][j].zhorena = mapy[vyber_mapa - 1].mapa[i][j].zhorena;
+                    data->mapa->mapa[i][j].x = mapy[vyber_mapa - 1].mapa[i][j].x;
+                    data->mapa->mapa[i][j].y = mapy[vyber_mapa - 1].mapa[i][j].y;
+                }
+
+            }
+
         }
 
         for (int uvolni = 0; uvolni < pocet_map; ++uvolni) {
-            if (uvolni == vyber_mapa - 1) {
-                continue;
-            } else {
-                mapa_destroy(&mapy[uvolni]);
-            }
+            mapa_destroy(&mapy[uvolni]);
+
         }
     } else {
         printf("Nie ste pripojený k serveru!\n");
@@ -260,7 +267,7 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA *data) {
                 mapa_rucne(data->mapa);
                 mapa_vykresli(*data->mapa);
             } else {
-                printf("Zadajte rozmery mapy:\n"); //TODO opravit vstupy
+                printf("Zadajte rozmery mapy:\n");
                 printf("\tSirka:\n");
                 int sirka;
                 scanf("%d", &sirka);
@@ -284,45 +291,44 @@ void zaciatocne_menu(char akcia, MENU_THREAD_DATA *data) {
                 *data->je_pozastavena = false;
                 *data->nova_mapa = true;
                 nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
-                pthread_cond_signal(data->bezi);
+                *data->menu_prerusenie = false;
                 pthread_mutex_unlock(data->mapa_mutex);
+                pthread_cond_signal(data->bezi);
             } else {
                 prijmi_mapy_zo_servera(data);
                 *data->je_pozastavena = false;
                 *data->nova_mapa = true;
                 *data->menu_prerusenie = false;
                 pthread_mutex_unlock(data->mapa_mutex);
-                break;
-            }
-                case 'C':
-                    //TODO: spravit aby to nepadlo ked nie je zapnuty server
-                    if (!*data->je_pripojeny) {
-                        if (connect(data->clientSocket, (struct sockaddr *) data->serverAddr,
-                                    sizeof(*data->serverAddr)) ==
-                            -1) {
-                            perror("Chyba pripojenia na server.\n");
-                            close(data->clientSocket);
-                            exit(EXIT_FAILURE);
-                        } else {
-                            printf("Uspesne pripojenie na server!\n");
-                            *data->je_pripojeny = true;
-                        }
-                    } else printf("Klient uz je pripojeny na server!\n");
-                *data->je_pozastavena = true;
-                zaciatocne_menu(' ', data);
-                break;
-                case 'X':
-                    *data->ukonci = false;
-                *data->je_pozastavena = false;
-                pthread_mutex_unlock(data->mapa_mutex);
-                pthread_cond_signal(data->bezi);
-                break;
-                default:
-                    printf("Zadany zlý parameter!\n");
-                break;
-            }
-    }
 
+            }
+            break;
+        case 'C':
+
+            if (!*data->je_pripojeny) {
+                if (connect(data->clientSocket, (struct sockaddr *) data->serverAddr, sizeof(*data->serverAddr)) == -1) {
+                   printf("Chyba pripojenia na server.\n");
+                    //close(data->clientSocket);
+                    //exit(EXIT_FAILURE);
+                } else {
+                    printf("Uspesne pripojenie na server!\n");
+                    *data->je_pripojeny = true;
+                }
+            } else printf("Klient uz je pripojeny na server!\n");
+            *data->je_pozastavena = true;
+            zaciatocne_menu(' ', data);
+            break;
+        case 'X':
+            *data->ukonci = false;
+            *data->je_pozastavena = false;
+            pthread_mutex_unlock(data->mapa_mutex);
+            pthread_cond_signal(data->bezi);
+            break;
+        default:
+            printf("Zadany zlý parameter!\n");
+            break;
+    }
+}
 
 
 void zapal_bunky(void *thr_data) {
@@ -438,56 +444,58 @@ void *menu(void *thr_data) {
                     pthread_mutex_unlock(data->mapa_mutex);
                     *data->menu_prerusenie = true;
                     break;
-                    case 'L':
-                        printf("Chcete načítať mapu z lokálneho súboru alebo serveru ? J/S\n");
-                    while (akcia != 'J' && akcia != 'S') {
-                        scanf(" %c", &akcia);
-                    }
-                    if (akcia == 'J') {
-                        *data->je_pozastavena = false;
-                        *data->nova_mapa = true;
-                        nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
-                        pthread_mutex_unlock(data->mapa_mutex);
-                    } else {
-                        prijmi_mapy_zo_servera(data);
-                        *data->je_pozastavena = false;
-                        *data->nova_mapa = true;
-                        *data->menu_prerusenie = false;
-                        pthread_mutex_unlock(data->mapa_mutex);
-                        break;
-
-                        case 'C':
-                            //TODO: spravit aby to nepadlo ked nie je zapnuty server
-                            if (!*data->je_pripojeny) {
-                                if (connect(data->clientSocket, (struct sockaddr *) data->serverAddr,
-                                            sizeof(*data->serverAddr)) ==
-                                    -1) {
-                                    perror("Chyba pripojenia na server.\n");
-                                    close(data->clientSocket);
-                                    exit(EXIT_FAILURE);
-                                } else {
-                                    printf("Uspesne pripojenie na server!\n");
-                                    *data->je_pripojeny = true;
-                                }
-                            } else printf("Klient uz je pripojeny na server!\n");
-                        *data->je_pozastavena = true;
-                        *data->menu_prerusenie = true;
-                        pthread_mutex_unlock(data->mapa_mutex);
-                        break;
-                        case 'X':
-                            *data->ukonci = false;
-                        *data->je_pozastavena = false;
-                        pthread_mutex_unlock(data->mapa_mutex);
-                        pthread_cond_signal(data->bezi);
-                        break;
-                        default:
-                            printf("Zadany zlý parameter!\n");
-                        break;
-                    }
                 }
+            case 'L':
+                printf("Chcete načítať mapu z lokálneho súboru alebo serveru ? J/S\n");
+                while (akcia != 'J' && akcia != 'S') {
+                    scanf(" %c", &akcia);
+                }
+                if (akcia == 'J') {
+                    *data->je_pozastavena = false;
+                    *data->nova_mapa = true;
+                    nacitanie_mapy(data->mapa, "../UlozeneMapy/UlozeneMapy.txt");
+                    *data->menu_prerusenie = false;
+                    pthread_mutex_unlock(data->mapa_mutex);
+
+                } else {
+                    prijmi_mapy_zo_servera(data);
+                    *data->je_pozastavena = false;
+                    *data->nova_mapa = true;
+                    *data->menu_prerusenie = false;
+                    pthread_mutex_unlock(data->mapa_mutex);
+                }
+
+            case 'C':
+
+                if (!*data->je_pripojeny) {
+                    if (connect(data->clientSocket, (struct sockaddr *) data->serverAddr,
+                                sizeof(*data->serverAddr)) ==
+                        -1) {
+                        printf("Chyba pripojenia na server.\n");
+                        //close(data->clientSocket);
+                        //exit(EXIT_FAILURE);
+                    } else {
+                        printf("Uspesne pripojenie na server!\n");
+                        *data->je_pripojeny = true;
+                    }
+                } else printf("Klient uz je pripojeny na server!\n");
+                *data->je_pozastavena = true;
+                *data->menu_prerusenie = true;
+                pthread_mutex_unlock(data->mapa_mutex);
+                break;
+            case 'X':
+                *data->ukonci = false;
+                *data->je_pozastavena = false;
+                pthread_mutex_unlock(data->mapa_mutex);
+                pthread_cond_signal(data->bezi);
+                break;
+            default:
+                printf("Zadany zlý parameter!\n");
+                break;
         }
-        pthread_mutex_unlock(data->mapa_mutex);
     }
+
+    pthread_mutex_unlock(data->mapa_mutex);
 }
 
 
@@ -500,7 +508,7 @@ int main() {
 
     pthread_t thread_menu, thread_simulacia;
     MAPA mapa;
-    mapa.je_inicializovana = false;
+    mapa.je_inicializovana = true;
     VIETOR vietor;
 
     SIMULACIA_THREAD_DATA simulacia_thread_data;
